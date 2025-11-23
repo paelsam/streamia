@@ -1,0 +1,102 @@
+/**
+ * EventBus for communication between microfrontends
+ * Provides pub/sub pattern for cross-MFE communication
+ */
+
+type EventCallback = (data: any) => void;
+
+export class EventBus {
+  private events: Map<string, EventCallback[]> = new Map();
+
+  /**
+   * Subscribe to an event
+   * @param event Event name
+   * @param callback Callback function
+   * @returns Unsubscribe function
+   */
+  subscribe(event: string, callback: EventCallback): () => void {
+    if (!this.events.has(event)) {
+      this.events.set(event, []);
+    }
+    this.events.get(event)!.push(callback);
+
+    // Return cleanup function
+    return () => {
+      const callbacks = this.events.get(event);
+      if (callbacks) {
+        const index = callbacks.indexOf(callback);
+        if (index > -1) {
+          callbacks.splice(index, 1);
+        }
+      }
+    };
+  }
+
+  /**
+   * Publish an event
+   * @param event Event name
+   * @param data Event data
+   */
+  publish(event: string, data?: any): void {
+    const callbacks = this.events.get(event);
+    if (callbacks) {
+      callbacks.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`Error in event callback for "${event}":`, error);
+        }
+      });
+    }
+  }
+
+  /**
+   * Unsubscribe all callbacks for an event
+   * @param event Event name
+   */
+  unsubscribe(event: string): void {
+    this.events.delete(event);
+  }
+
+  /**
+   * Clear all events
+   */
+  clear(): void {
+    this.events.clear();
+  }
+
+  /**
+   * Get list of registered events
+   */
+  getEvents(): string[] {
+    return Array.from(this.events.keys());
+  }
+}
+
+// Singleton instance
+export const eventBus = new EventBus();
+
+// Event names constants
+export const EVENTS = {
+  // Auth events
+  USER_LOGIN: 'user:login',
+  USER_LOGOUT: 'user:logout',
+  USER_UPDATED: 'user:updated',
+  USER_DELETED: 'user:deleted',
+  
+  // Navigation events
+  ROUTE_CHANGE: 'route:change',
+  
+  // Movie events
+  FAVORITE_ADDED: 'favorite:added',
+  FAVORITE_REMOVED: 'favorite:removed',
+  MOVIE_RATED: 'movie:rated',
+  COMMENT_ADDED: 'comment:added',
+  
+  // UI events
+  LOADING_START: 'loading:start',
+  LOADING_END: 'loading:end',
+  ERROR_OCCURRED: 'error:occurred',
+} as const;
+
+export type EventName = typeof EVENTS[keyof typeof EVENTS];

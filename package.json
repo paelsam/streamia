@@ -1,0 +1,27 @@
+{
+  "name": "streamia-microfrontends",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:shell\" \"npm run dev:auth\"",
+    "dev:shell": "npm run dev --workspace=shell",
+    "dev:auth": "npm run dev --workspace=@streamia/auth-mfe",
+    "build": "npm run build --workspaces",
+    "build:shell": "npm run build --workspace=shell",
+    "build:auth": "npm run build --workspace=@streamia/auth-mfe",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules",
+    "verify": "./verify-deployment.sh",
+    "deploy": "./deploy-vercel.sh",
+    "deploy:auth": "cd packages/auth-mfe && vercel --prod",
+    "deploy:shell": "cd packages/shell && vercel --prod"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "concurrently": "^8.2.2"
+  }
+}

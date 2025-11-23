@@ -1,0 +1,217 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.register-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+}
+
+.register-form {
+  background: #141414;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 500px;
+
+  .logo {
+    text-align: center;
+    margin-bottom: 1rem;
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: $font-weight-extrabold;
+      color: $primary-color;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+  }
+
+  h2 {
+    margin-bottom: 0.5rem;
+    text-align: center;
+    color: $text-primary;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    margin-bottom: 2rem;
+  }
+
+  .api-error {
+    background: rgba($primary-color, 0.1);
+    border: 1px solid $primary-color;
+    color: $primary-color;
+    padding: 0.75rem 1rem;
+    border-radius: $border-radius-md;
+    margin-bottom: 1.5rem;
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: $font-weight-medium;
+      color: $text-secondary;
+      font-size: $font-size-sm;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: #2d2d2d;
+      border: 1px solid #404040;
+      border-radius: $border-radius-md;
+      font-size: $font-size-base;
+      color: $text-primary;
+      transition: all $transition-normal;
+
+      &::placeholder {
+        color: #8c8c8c;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+
+      &.error {
+        border-color: $primary-color;
+        background: rgba($primary-color, 0.05);
+      }
+
+      &:disabled {
+        background-color: #1a1a1a;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      &[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+        
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+      }
+    }
+
+    .error-message {
+      display: block;
+      color: $primary-color;
+      font-size: $font-size-xs;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .submit-button {
+    width: 100%;
+    padding: 0.875rem;
+    background: $primary-color;
+    color: $text-primary;
+    border: none;
+    border-radius: $border-radius-md;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: all $transition-normal;
+    margin-top: 0.5rem;
+
+    &:hover:not(:disabled) {
+      background: #ff1a1a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba($primary-color, 0.4);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      background: #4d2d2d;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .form-links {
+    margin-top: 1.5rem;
+    text-align: center;
+
+    .login-link {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+    }
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      transition: color $transition-normal;
+
+      &:hover {
+        color: #ff1a1a;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  .register-form-container {
+    padding: 1rem;
+  }
+
+  .register-form {
+    padding: 1.5rem;
+
+    h2 {
+      font-size: $font-size-2xl;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .register-form {
+    h2 {
+      font-size: $font-size-xl;
+    }
+
+    .subtitle {
+      font-size: $font-size-xs;
+    }
+  }
+}

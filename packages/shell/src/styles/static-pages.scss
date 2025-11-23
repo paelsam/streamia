@@ -1,0 +1,115 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.static-page {
+  color: $text-primary;
+  background: $background-dark;
+
+  .static-hero {
+    position: relative;
+    height: 360px;
+   background-image:
+      url('/images/landingpageimage.jpg'),
+      url('../assets/landingpageimage.jpg'),
+      url('/landingpageimage.jpg'),
+      url('https://images.unsplash.com/photo-1489599808417-8a0a4b2b8b8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover, cover, cover;
+    background-position: center 53%, center top, center top;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+
+    @include mobile { height: 220px; }
+
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.85));
+    }
+  }
+
+  .static-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 16px 56px;
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+
+    p {
+      color: #d6d6d6;
+      line-height: 1.7;
+      margin: 0 0 12px;
+    }
+
+    ul.sitemap-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 10px 24px;
+
+      @include mobile { grid-template-columns: 1fr; }
+
+      li a {
+        color: #d6d6d6;
+        text-decoration: none;
+        border-bottom: 1px dashed #444;
+        padding-bottom: 4px;
+        &:hover { color: #fff; border-color: $primary-color; }
+      }
+    }
+
+    .lead {
+      font-size: 18px;
+      color: #e3e3e3;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+      @include tablet { grid-template-columns: repeat(2, 1fr); }
+      @include mobile { grid-template-columns: 1fr; }
+
+      .card {
+        background: #141414;
+        border: 1px solid #242424;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+
+        h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+        p { margin: 0; }
+      }
+    }
+
+    .sitemap-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+      @include tablet { grid-template-columns: repeat(2, 1fr); }
+      @include mobile { grid-template-columns: 1fr; }
+
+      .link-card {
+        background: #141414;
+        border: 1px solid #242424;
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        a { color: #dcdcdc; text-decoration: none; }
+        a:hover { color: #fff; }
+      }
+    }
+  }
+}
+
+.static-page--contact .static-content p strong { color: #f1f1f1; }
+
+// Page specific accents
+.contact-page .static-hero { background-image: radial-gradient(circle at 20% 20%, rgba(255,70,70,.15), transparent 40%), radial-gradient(circle at 70% 0%, rgba(255,70,70,.06), transparent 45%), #0f0f0f; }
+.sitemap-page .static-hero { background-image: radial-gradient(circle at 30% 15%, rgba(255,0,0,.12), transparent 40%), radial-gradient(circle at 90% 10%, rgba(255,0,0,.05), transparent 45%), #0f0f0f; }

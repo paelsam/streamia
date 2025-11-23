@@ -1,0 +1,155 @@
+@use 'sass:color';
+@use 'variables' as *;
+
+// Responsive Mixins
+@mixin mobile {
+  @media (max-width: #{$mobile - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$mobile}) and (max-width: #{$tablet - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$tablet}) {
+    @content;
+  }
+}
+
+@mixin large-desktop {
+  @media (min-width: #{$desktop}) {
+    @content;
+  }
+}
+
+// Flexbox Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Button Mixins
+@mixin button-base {
+  padding: 0.75rem 1.5rem;
+  border-radius: $border-radius-md;
+  text-decoration: none;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  transition: all $transition-normal;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  outline: none;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background: $primary-color;
+  color: $text-primary;
+  border: 2px solid $primary-color;
+
+  &:hover {
+    background: color.adjust($primary-color, $lightness: 10%);
+    border-color: color.adjust($primary-color, $lightness: 10%);
+    box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+  }
+}
+
+@mixin button-outline {
+  @include button-base;
+  background: transparent;
+  color: $text-primary;
+  border: 2px solid $text-primary;
+
+  &:hover {
+    background: $text-primary;
+    color: $background-dark;
+  }
+}
+
+// Text Mixins
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-gradient {
+  background: linear-gradient(45deg, $primary-color, color.adjust($primary-color, $lightness: 20%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Layout Mixins
+@mixin container {
+  max-width: $desktop;
+  margin: 0 auto;
+  padding: 0 $spacing-xl;
+
+  @include mobile {
+    padding: 0 $spacing-md;
+  }
+}
+
+@mixin section-padding {
+  padding: $spacing-xxl 0;
+
+  @include mobile {
+    padding: $spacing-xl 0;
+  }
+}
+
+// Animation Mixins
+@mixin fade-in($duration: 0.5s) {
+  animation: fadeIn $duration ease-in-out;
+}
+
+@mixin slide-up($duration: 0.5s) {
+  animation: slideUp $duration ease-out;
+}
+
+// Keyframes
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

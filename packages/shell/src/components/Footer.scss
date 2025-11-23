@@ -1,0 +1,76 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.footer {
+  background: linear-gradient(180deg, $background-dark 0%, $background-gray 100%);
+  color: $text-primary;
+  padding: $spacing-xxl 0 $spacing-lg;
+  margin-top: $spacing-xxl * 2;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+  &-container {
+    max-width: $desktop;
+    margin: 0 auto;
+    padding: 0 $spacing-xl;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-xl;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      text-align: center;
+      padding: 0 $spacing-md;
+    }
+  }
+
+  &-section {
+    h3 {
+      font-size: $font-size-2xl;
+      margin-bottom: $spacing-md;
+      color: $primary-color;
+      font-weight: $font-weight-bold;
+    }
+
+    h4 {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-sm;
+      color: $text-primary;
+      font-weight: $font-weight-semibold;
+    }
+
+    p {
+      color: $text-secondary;
+      line-height: 1.6;
+      font-size: $font-size-sm;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+
+      li {
+        margin-bottom: $spacing-sm;
+
+        a {
+          color: $text-secondary;
+          text-decoration: none;
+          transition: color $transition-normal;
+          font-size: $font-size-sm;
+
+          &:hover {
+            color: $primary-color;
+          }
+        }
+      }
+    }
+  }
+
+  &-copy {
+    margin-top: $spacing-xl;
+    padding-top: $spacing-xl;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    color: $text-muted;
+    font-size: $font-size-sm;
+  }
+}

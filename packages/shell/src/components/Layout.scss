@@ -1,0 +1,21 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $background-dark;
+
+  &-main {
+    flex: 1;
+    max-width: $desktop;
+    width: 100%;
+    margin: 0 auto;
+    padding: $spacing-xl;
+
+    @include mobile {
+      padding: $spacing-md;
+    }
+  }
+}

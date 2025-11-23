@@ -1,0 +1,353 @@
+.edit-profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #000000 0%, #140606 50%, #1c0a0a 100%);
+  padding: 2rem;
+  color: white;
+}
+
+.edit-profile-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+// Header
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .back-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .profile-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+// Layout
+.profile-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+}
+
+// Tarjeta de Usuario
+.user-card {
+  background: #302b2b;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  border: 1px solid #4d2d2d;
+
+  .user-avatar {
+    margin-bottom: 1.5rem;
+
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f16371, #e54646);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+    }
+  }
+
+  .user-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .user-email {
+    color: #b0a0a0;
+    margin: 0;
+  }
+  
+  .user-age {
+    color: #b0a0a0;
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+  }
+}
+
+// Formulario
+.form-section {
+  background: #302c2c;
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid #301c1c;
+}
+
+.form-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #b0a0a0;
+    margin: 0;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.input-group {
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #b0a0a0;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #271c1c;
+    border-radius: 8px;
+    color: white;
+    
+    &::placeholder {
+      color: #b0a0a0;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #f16371;
+    }
+  }
+
+  &.has-toggle {
+    input {
+      padding-right: 3rem;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #b0a0a0;
+      cursor: pointer;
+    }
+  }
+}
+
+// Botones
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+
+  .cancel-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4d2d2d;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .save-button {
+    padding: 0.75rem 1.5rem;
+    background: #f16371;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      background: #e54646;
+    }
+  }
+}
+
+// Sección de eliminar cuenta
+.delete-account-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  border: 1px solid #e74c3c;
+  border-radius: 12px;
+  background: #2f1a1a;
+  
+  .delete-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+    
+    h3 {
+      color: #f16371;
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    
+    .delete-icon {
+      color: #f16371;
+    }
+  }
+  
+  .delete-warning {
+    color: #b0a0a0;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+  
+  .delete-toggle-button {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background: #b91c1c;
+    }
+  }
+  
+  .delete-confirmation {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #4d2d2d;
+    
+    p {
+      color: #b0a0a0;
+      margin-bottom: 1rem;
+    }
+    
+    .delete-input-container {
+      margin-bottom: 1rem;
+    }
+    
+    .delete-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #4d2d2d;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      
+      &::placeholder {
+        color: #b0a0a0;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: #f16371;
+      }
+    }
+    
+    .password-input-container {
+      margin-bottom: 1rem;
+      
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #b0a0a0;
+        font-weight: 500;
+      }
+    }
+    
+    .confirm-delete-button {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      width: 100%;
+      transition: background-color 0.2s;
+      
+      &:hover:not(:disabled) {
+        background: #b91c1c;
+      }
+      
+      &:disabled {
+        background: #4d2d2d;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+  }
+}
+
+// Mensaje de éxito
+.success-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #10b981;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

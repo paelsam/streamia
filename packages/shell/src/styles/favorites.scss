@@ -1,0 +1,81 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.favorites {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(10,10,10,1) 0%, rgba(20,20,20,1) 30%, rgba(12,12,12,1) 100%);
+
+  &__hero {
+    padding: 2.5rem 2rem;
+    background: linear-gradient(180deg, rgba(80,10,10,0.9), rgba(10,10,10,0.95));
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  &__hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    color: $text-primary;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: 1.8rem;
+    font-weight: $font-weight-extrabold;
+    margin: 0;
+    color: $text-primary;
+  }
+
+  &__count {
+    color: $text-secondary;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  &__content {
+    max-width: 1200px;
+    margin: 1.25rem auto 3rem;
+    padding: 0 1rem;
+  }
+
+  &__row {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1rem 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start;
+    padding-bottom: 1.5rem;
+    border-bottom: 0;
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+  }
+
+  &__card {
+    position: relative;
+    min-width: 200px;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  }
+
+  @include mobile {
+    &__hero-inner { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+    &__row { gap: 0.8rem; padding: 0.5rem 0; }
+  }
+}
