@@ -203,7 +203,7 @@ npm install
 npm run dev
 
 # O iniciar individualmente
-npm run dev:shell    # Puerto 5173
+npm run dev:shell    # Puerto 3000
 npm run dev:auth     # Puerto 3001
 ```
 
