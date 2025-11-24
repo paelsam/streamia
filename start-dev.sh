@@ -13,8 +13,37 @@ NC='\033[0m' # No Color
 
 # Matar procesos previos
 echo "Limpiando procesos previos..."
-pkill -f "vite" || true
+
+# Función para matar proceso en un puerto específico
+kill_port() {
+    local port=$1
+    local pid=$(lsof -ti :$port 2>/dev/null)
+    if [ ! -z "$pid" ]; then
+        echo "  Matando proceso en puerto $port (PID: $pid)"
+        kill -9 $pid 2>/dev/null || true
+    fi
+}
+
+# Matar procesos en puertos específicos
+kill_port 3000
+kill_port 3001
+kill_port 3006
+
+# Matar cualquier proceso de vite restante
+pkill -f "vite" 2>/dev/null || true
+
+# Esperar a que los puertos se liberen
 sleep 2
+
+# Verificar que los puertos estén libres
+for port in 3000 3001 3006; do
+    if lsof -ti :$port > /dev/null 2>&1; then
+        echo "Advertencia: Puerto $port todavía en uso"
+        # Intentar matar de nuevo con más fuerza
+        kill -9 $(lsof -ti :$port) 2>/dev/null || true
+        sleep 1
+    fi
+done
 
 # Limpiar builds anteriores
 echo "Limpiando builds anteriores..."
