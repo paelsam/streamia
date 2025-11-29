@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import Comments from "./comments";
 import "@streamia/shared/styles/index.scss";
