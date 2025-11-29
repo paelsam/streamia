@@ -111,6 +111,10 @@ export const EVENTS = {
   LOADING_START: 'loading:start',
   LOADING_END: 'loading:end',
   ERROR_OCCURRED: 'error:occurred',
+
+  // Comments events
+  COMMENT_CREATED: 'comment:created',
+  COMMENT_DELETED: 'comment:deleted',
 } as const;
 
 export type EventName = typeof EVENTS[keyof typeof EVENTS];

@@ -1,0 +1,24 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import Comments from "./comments";
+import "@streamia/shared/styles/index.scss";
+
+
+export function mount(
+  el: HTMLElement,
+  props: { movieId: string; token?: string }
+) {
+  const root = ReactDOM.createRoot(el);
+  root.render(<Comments {...props} />);
+}
+
+if ((import.meta as any).env?.DEV) {
+  const el = document.getElementById("root");
+
+  if (el) {
+    mount(el, {
+      movieId: "68fe73ef1f47ab544c72e3d8", // se simula Demon Slayer
+      token: "TEST_TOKEN", 
+    });
+  }
+}
