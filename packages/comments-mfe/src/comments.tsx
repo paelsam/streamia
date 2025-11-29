@@ -40,21 +40,67 @@ export default function Comments({ movieId, token }: CommentsProps) {
     }
   };
 
+  const [newComment, setNewComment] = useState("");
+  const [loading, setLoading] = useState(false);
 
- return (
+  const currentUser = "Usuario Test";
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      setLoading(true);
+
+      await createComment(
+        movieId,
+        newComment,
+        token || "TEMP_TOKEN"
+      );
+
+      setNewComment("");
+
+      const updated = await getComments(movieId);
+      setComments(updated);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+  return (
     <section className="movie-detail__comments">
       <h2 className="movie-detail__comments-title">
         Comentarios
-        <span className="movie-detail__comments-count">
-          ({comments.length})
-        </span>
+        <span className="movie-detail__comments-count">({comments.length})</span>
       </h2>
 
+      {/* FORM */}
+      <div className="movie-detail__comment-form">
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Comparte tu opinión sobre esta película..."
+          className="movie-detail__comment-input"
+          rows={4}
+        />
+
+        <button
+          className="movie-detail__comment-submit"
+          onClick={handleAddComment}
+          disabled={!newComment.trim() || loading}
+        >
+          Publicar comentario
+        </button>
+      </div>
+
+      {/* LISTA */}
       <div className="movie-detail__comments-list">
         {comments.length === 0 ? (
-          <div className="movie-detail__no-comments">
-            <h3>No hay comentarios aún</h3>
-          </div>
+          <p>No hay comentarios aún</p>
         ) : (
           comments.map((c) => (
             <div key={c._id} className="movie-detail__comment">
@@ -73,5 +119,6 @@ export default function Comments({ movieId, token }: CommentsProps) {
         )}
       </div>
     </section>
+
   );
 }

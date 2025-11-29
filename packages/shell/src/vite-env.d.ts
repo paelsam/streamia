@@ -34,11 +34,16 @@ declare module 'staticMFE/SitemapPage' {
   const SitemapPage: React.ComponentType;
   export { SitemapPage };
 }
+declare module 'commentMFE/CommentPage' {
+  const CommentPage: React.ComponentType;
+  export { CommentPage };
+}
 
 interface ImportMetaEnv {
   readonly DEV: boolean;
   readonly VITE_AUTH_MFE_URL?: string;
   readonly VITE_STATIC_MFE_URL?: string;
+  readonly VITE_COMMENT_MFE_URL?: string;
 }
 
 interface ImportMeta {
