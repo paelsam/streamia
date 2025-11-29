@@ -1,7 +1,11 @@
 import { LoginFormData, RegisterFormData, RecoverPasswordFormData, ResetPasswordFormData } from '../schemas/authSchemas';
 import type { ApiResponse, User } from '@streamia/shared/types';
+import { createLogger } from '@streamia/shared/utils';
 
 const API_URL =  'http://localhost:3000/api';
+
+// Log de configuración al iniciar
+logger.info('AuthService initialized', { API_URL });
 
 export const authService = {
   async login(data: LoginFormData): Promise<ApiResponse<{ user: User; token: string }>> {

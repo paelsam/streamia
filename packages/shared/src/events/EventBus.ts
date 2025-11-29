@@ -19,6 +19,10 @@ export class EventBus {
       this.events.set(event, []);
     }
     this.events.get(event)!.push(callback);
+    
+    console.log(`[EventBus] Subscribed to "${event}"`, { 
+      totalSubscribers: this.events.get(event)!.length 
+    });
 
     // Return cleanup function
     return () => {
@@ -27,6 +31,9 @@ export class EventBus {
         const index = callbacks.indexOf(callback);
         if (index > -1) {
           callbacks.splice(index, 1);
+          console.log(`[EventBus] Unsubscribed from "${event}"`, { 
+            remainingSubscribers: callbacks.length 
+          });
         }
       }
     };
@@ -39,14 +46,21 @@ export class EventBus {
    */
    publish(event: string, data?: any): void {
     const callbacks = this.events.get(event);
+    console.log(`[EventBus] Publishing "${event}"`, { 
+      subscriberCount: callbacks?.length || 0,
+      data: data ? (data.token ? { ...data, token: '***' } : data) : undefined
+    });
+    
     if (callbacks) {
       callbacks.forEach(callback => {
         try {
           callback(data);
         } catch (error) {
-          console.error(`Error in event callback for "${event}":`, error);
+          console.error(`[EventBus] Error in event callback for "${event}":`, error);
         }
       });
+    } else {
+      console.warn(`[EventBus] No subscribers for event "${event}"`);
     }
   }
 
