@@ -25,7 +25,7 @@ declare -a MFE_CONFIGS=(
     "Catalog MFE:catalog-mfe:3002"
     # Ejemplo para añadir más:
     # "Movies MFE:movies-mfe:3002"
-    # "Profile MFE:profile-mfe:3003"
+    "Profile MFE:profile-mfe:3004"
 )
 
 SHELL_PORT=5000

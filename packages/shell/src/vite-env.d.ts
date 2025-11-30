@@ -49,6 +49,12 @@ declare module 'favoritesMFE/App' {
   export default App;
 }
 
+declare module 'profileMFE/App' {
+  const App: React.ComponentType;
+  export default App;
+}
+
+
 interface ImportMetaEnv {
   readonly DEV: boolean;
   readonly VITE_AUTH_MFE_URL?: string;

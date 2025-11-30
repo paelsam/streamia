@@ -1,0 +1,59 @@
+@use './app.scss';
+
+.edit-profile-page {
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .edit-form, .password-form {
+    background: #1a1a1a;
+    padding: 1.5rem;
+    border-radius: 8px;
+
+    h2 {
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    label {
+      display: block;
+      margin-top: 0.75rem;
+      color: #b3b3b3;
+      font-size: 0.95rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      margin-top: 0.4rem;
+      border-radius: 6px;
+      background: #0f0f0f;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #fff;
+    }
+
+    .btn {
+      margin-top: 1rem;
+    }
+  }
+
+  /* Side column (could be used for delete account) */
+  .side-actions {
+    background: #141414;
+    padding: 1rem;
+    border-radius: 8px;
+
+    .danger {
+      margin-top: 1rem;
+      background: transparent;
+      border: 1px solid rgba(229,9,20,0.25);
+      color: #e50914;
+    }
+  }
+}

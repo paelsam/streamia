@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
           commentsMFE: env.VITE_COMMENTS_MFE_URL || 'http://localhost:3007/assets/remoteEntry.js',
           favoritesMFE: env.VITE_FAVORITES_MFE_URL || 'http://localhost:3005/assets/remoteEntry.js',
           catalogMFE: env.VITE_CATALOG_MFE_URL || 'http://localhost:3002/assets/remoteEntry.js',
+          profileMFE: env.VITE_PROFILE_MFE_URL || 'http://localhost:3004/assets/remoteEntry.js',
         },
         shared: {
           react: '^19.2.0',
