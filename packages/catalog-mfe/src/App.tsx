@@ -13,11 +13,13 @@ function App() {
   logger.info('Catalog MFE rendered', { path: location.pathname });
 
   // Determinar qué página mostrar basado en la ruta actual
-  const isMoviesListPage = location.pathname.startsWith('/movies');
+  // /movies → HomeMoviesPage (página principal)
+  // /movies/browse → MoviesListPage (listado con filtros)
+  const isBrowsePage = location.pathname.includes('/browse');
 
   return (
     <div className="catalog-app">
-      {isMoviesListPage ? <MoviesListPage /> : <HomeMoviesPage />}
+      {isBrowsePage ? <MoviesListPage /> : <HomeMoviesPage />}
     </div>
   );
 }

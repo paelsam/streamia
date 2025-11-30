@@ -68,18 +68,7 @@ export const AppRouter: React.FC = () => {
               <Route path="/reset-password/*" element={<GuestRoute><AuthMFE /></GuestRoute>} />
 
               {/* Catalog MFE Routes */}
-              <Route path="/home-movies/*" element={<CatalogMFE />} />
               <Route path="/movies/*" element={<CatalogMFE />} />
-
-              {/* Protected Routes - Placeholder for other MFEs */}
-              <Route
-                path="/movies"
-                element={
-                  <ProtectedRoute>
-                    <div>Movies MFE (To be implemented)</div>
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="/movie/:id"
                 element={

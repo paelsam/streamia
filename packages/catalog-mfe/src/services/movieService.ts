@@ -1,88 +1,83 @@
 import { createLogger } from '@streamia/shared/utils';
+import { API_URL } from '@streamia/shared/config';
 import type { Movie, MovieFilters, MovieResponse } from '../types/movie.types';
-import { mockMovies, searchMovies, filterByCategory, filterByGenre, filterByRating } from '../data/mockMovies';
 
 const logger = createLogger('CatalogMFE:MovieService');
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || false;
 
 class MovieService {
   /**
-   * Aplicar filtros a una lista de películas
+   * Normalizar respuesta del backend a nuestro formato Movie[]
    */
-  private applyFilters(movies: Movie[], filters?: MovieFilters): Movie[] {
-    let filtered = [...movies];
-
-    logger.debug('Applying filters', { 
-      initialCount: movies.length, 
-      filters 
-    });
-
-    // Aplicar búsqueda
-    if (filters?.search) {
-      filtered = searchMovies(filters.search, filtered);
-      logger.debug('Search filter applied', { 
-        query: filters.search, 
-        results: filtered.length 
-      });
+  private normalizeMoviesResponse(data: any): Movie[] {
+    // El backend puede devolver { movies: [...] } o directamente [...]
+    let rawMovies: any[] = [];
+    
+    if (Array.isArray(data)) {
+      rawMovies = data;
+    } else if (data.movies && Array.isArray(data.movies)) {
+      rawMovies = data.movies;
+    } else if (data.data && Array.isArray(data.data)) {
+      rawMovies = data.data;
     }
 
-    // Aplicar filtro de categoría
-    if (filters?.category) {
-      filtered = filterByCategory(filters.category, filtered);
-      logger.debug('Category filter applied', { 
-        category: filters.category, 
-        results: filtered.length 
-      });
+    return rawMovies.map(movie => this.normalizeMovie(movie));
+  }
+
+  /**
+   * Normalizar un objeto película del backend al formato Movie
+   * Backend Cloudinary format:
+   * - _id, title, description, category, coverImage, videoUrl, duration, subtitles, createdAt
+   */
+  private normalizeMovie(movie: any): Movie {
+    // Extraer año de createdAt para releaseDate
+    const createdAt = movie.createdAt ? new Date(movie.createdAt) : null;
+    const releaseDate = createdAt ? createdAt.toISOString().split('T')[0] : '';
+
+    // La categoría del backend se usa también como género principal
+    const category = movie.category || 'General';
+    const genres = Array.isArray(movie.genres) && movie.genres.length > 0 
+      ? movie.genres 
+      : [category];
+
+    return {
+      id: movie._id || movie.id,
+      title: movie.title || 'Sin título',
+      description: movie.description || '',
+      posterUrl: movie.coverImage || movie.posterUrl || movie.poster || movie.imageUrl || '',
+      backdropUrl: movie.coverImage || movie.backdropUrl || movie.backdrop || '',
+      releaseDate: movie.releaseDate || releaseDate,
+      rating: typeof movie.rating === 'number' ? movie.rating : parseFloat(movie.rating) || 8.0, // Default rating
+      duration: typeof movie.duration === 'number' ? movie.duration : parseInt(movie.duration) || 0,
+      category: category,
+      genres: genres,
+      isFavorite: movie.isFavorite || false,
+      videoUrl: movie.videoUrl || movie.url || undefined,
+      subtitles: this.normalizeSubtitles(movie.subtitles),
+    };
+  }
+
+  /**
+   * Normalizar subtítulos del backend
+   */
+  private normalizeSubtitles(subtitles: any[]): { lang: string; label: string; url: string }[] | undefined {
+    if (!Array.isArray(subtitles) || subtitles.length === 0) {
+      return undefined;
     }
 
-    // Aplicar filtro de género
-    if (filters?.genre) {
-      filtered = filterByGenre(filters.genre, filtered);
-      logger.debug('Genre filter applied', { 
-        genre: filters.genre, 
-        results: filtered.length 
-      });
-    }
-
-    // Aplicar filtro de calificación
-    if (filters?.rating) {
-      filtered = filterByRating(filters.rating, filtered);
-      logger.debug('Rating filter applied', { 
-        rating: filters.rating, 
-        results: filtered.length 
-      });
-    }
-
-    logger.info('Filters applied successfully', { 
-      finalCount: filtered.length 
-    });
-
-    return filtered;
+    return subtitles.map(sub => ({
+      lang: sub.language || sub.lang || 'unknown',
+      label: sub.label || sub.language || 'Unknown',
+      url: sub.url || '',
+    })).filter(sub => sub.url);
   }
 
   /**
    * Obtener películas con filtros
+   * GET /api/movies o GET /api/movies/explore
    */
   async getMovies(filters?: MovieFilters): Promise<MovieResponse> {
-    logger.info('Fetching movies', { filters, mode: USE_MOCK_DATA ? 'mock' : 'backend' });
+    logger.info('Fetching movies from backend', { filters });
 
-    // Modo Mock
-    if (USE_MOCK_DATA) {
-      const filtered = this.applyFilters(mockMovies, filters);
-      logger.info('Movies fetched successfully (mock)', { 
-        count: filtered.length 
-      });
-      
-      return {
-        movies: filtered,
-        total: filtered.length,
-        page: 1,
-        pageSize: filtered.length,
-      };
-    }
-
-    // Modo Backend con fallback a mock
     try {
       const params = new URLSearchParams();
       
@@ -91,7 +86,12 @@ class MovieService {
       if (filters?.rating) params.append('rating', filters.rating.toString());
       if (filters?.search) params.append('search', filters.search);
 
-      const url = `${API_BASE_URL}/movies?${params.toString()}`;
+      // Usar /explore si hay filtros, sino /movies
+      const hasFilters = filters && Object.values(filters).some(v => v !== undefined);
+      const endpoint = hasFilters ? '/movies/explore' : '/movies';
+      const queryString = params.toString();
+      const url = `${API_URL}${endpoint}${queryString ? `?${queryString}` : ''}`;
+      
       logger.debug('Fetching from backend', { url });
 
       const response = await fetch(url);
@@ -102,61 +102,47 @@ class MovieService {
 
       const data = await response.json();
       
+      // Normalizar respuesta del backend
+      const movies = this.normalizeMoviesResponse(data);
+      
       logger.info('Movies fetched successfully from backend', { 
-        count: data.movies?.length || 0 
-      });
-
-      return data;
-    } catch (error) {
-      logger.warn('Backend unavailable, falling back to mock data', { error });
-      
-      // Fallback a datos mock
-      const filtered = this.applyFilters(mockMovies, filters);
-      
-      logger.info('Movies fetched from mock fallback', { 
-        count: filtered.length 
+        count: movies.length 
       });
 
       return {
-        movies: filtered,
-        total: filtered.length,
+        movies,
+        total: movies.length,
         page: 1,
-        pageSize: filtered.length,
+        pageSize: movies.length,
       };
+    } catch (error) {
+      logger.error('Error fetching movies from backend', { error });
+      throw error;
     }
   }
 
   /**
    * Obtener película por ID
+   * GET /api/movies/:id
    */
   async getMovieById(id: string): Promise<Movie> {
-    logger.info('Fetching movie by ID', { id, mode: USE_MOCK_DATA ? 'mock' : 'backend' });
+    logger.info('Fetching movie by ID from backend', { id });
 
-    // Modo Mock
-    if (USE_MOCK_DATA) {
-      const movie = mockMovies.find(m => m.id === id);
-      
-      if (!movie) {
-        logger.error('Movie not found in mock data', { id });
-        throw new Error(`Película con id ${id} no encontrada`);
-      }
-
-      logger.info('Movie found in mock data', { id, title: movie.title });
-      return movie;
-    }
-
-    // Modo Backend con fallback a mock
     try {
-      const url = `${API_BASE_URL}/movies/${id}`;
+      const url = `${API_URL}/movies/${id}`;
       logger.debug('Fetching movie from backend', { url });
 
       const response = await fetch(url);
       
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Película con id ${id} no encontrada`);
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const movie = await response.json();
+      const data = await response.json();
+      const movie = this.normalizeMovie(data.movie || data);
       
       logger.info('Movie fetched successfully from backend', { 
         id, 
@@ -165,18 +151,8 @@ class MovieService {
 
       return movie;
     } catch (error) {
-      logger.warn('Backend unavailable, falling back to mock data', { error, id });
-      
-      // Fallback a datos mock
-      const movie = mockMovies.find(m => m.id === id);
-      
-      if (!movie) {
-        logger.error('Movie not found in mock fallback', { id });
-        throw new Error(`Película con id ${id} no encontrada`);
-      }
-
-      logger.info('Movie found in mock fallback', { id, title: movie.title });
-      return movie;
+      logger.error('Error fetching movie by ID', { error, id });
+      throw error;
     }
   }
 
@@ -196,6 +172,9 @@ class MovieService {
     return response.movies;
   }
 
+  /**
+   * Buscar películas
+   */
   async searchMovies(query: string): Promise<Movie[]> {
     logger.info('Searching movies', { query });
     
@@ -209,38 +188,58 @@ class MovieService {
     return response.movies;
   }
 
-  getAvailableGenres(): string[] {
-    const genres = new Set<string>();
-    mockMovies.forEach(movie => {
-      movie.genres.forEach(genre => genres.add(genre));
-    });
-    
-    const genresList = Array.from(genres).sort();
-    
-    logger.debug('Available genres retrieved', { 
-      count: genresList.length,
-      genres: genresList 
-    });
-    
-    return genresList;
+  /**
+   * Obtener géneros disponibles desde el backend
+   */
+  async getAvailableGenres(): Promise<string[]> {
+    try {
+      const response = await this.getMovies();
+      const genres = new Set<string>();
+      
+      response.movies.forEach(movie => {
+        movie.genres.forEach(genre => genres.add(genre));
+      });
+      
+      const genresList = Array.from(genres).sort();
+      
+      logger.debug('Available genres retrieved', { 
+        count: genresList.length,
+        genres: genresList 
+      });
+      
+      return genresList;
+    } catch (error) {
+      logger.error('Error getting available genres', { error });
+      return [];
+    }
   }
 
-  getAvailableCategories(): string[] {
-    const categories = new Set<string>();
-    mockMovies.forEach(movie => {
-      if (movie.category) {
-        categories.add(movie.category);
-      }
-    });
-    
-    const categoriesList = Array.from(categories).sort();
-    
-    logger.debug('Available categories retrieved', { 
-      count: categoriesList.length,
-      categories: categoriesList 
-    });
-    
-    return categoriesList;
+  /**
+   * Obtener categorías disponibles desde el backend
+   */
+  async getAvailableCategories(): Promise<string[]> {
+    try {
+      const response = await this.getMovies();
+      const categories = new Set<string>();
+      
+      response.movies.forEach(movie => {
+        if (movie.category) {
+          categories.add(movie.category);
+        }
+      });
+      
+      const categoriesList = Array.from(categories).sort();
+      
+      logger.debug('Available categories retrieved', { 
+        count: categoriesList.length,
+        categories: categoriesList 
+      });
+      
+      return categoriesList;
+    } catch (error) {
+      logger.error('Error getting available categories', { error });
+      return [];
+    }
   }
 }
 

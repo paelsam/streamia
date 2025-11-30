@@ -1,8 +1,10 @@
-const API_URL = "http://localhost:3000/api/comments";
+import { API_URL } from '@streamia/shared/config';
+
+const COMMENTS_API_URL = `${API_URL}/comments`;
 
 // Obtener comentarios por película
 export async function getComments(movieId: string) {
-  const res = await fetch(`${API_URL}/${movieId}`);
+  const res = await fetch(`${COMMENTS_API_URL}/${movieId}`);
 
   if (!res.ok) {
     throw new Error("Error cargando comentarios");
@@ -17,7 +19,7 @@ export async function createComment(
   text: string,
   token: string
 ) {
-  const res = await fetch(API_URL, {
+  const res = await fetch(COMMENTS_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -35,7 +37,7 @@ export async function createComment(
 
 // Actualizar comentario
 export async function updateComment(id: string, text: string, token: string) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${COMMENTS_API_URL}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -50,7 +52,7 @@ export async function updateComment(id: string, text: string, token: string) {
 
 // Eliminar comentario
 export async function deleteComment(id: string, token: string) {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${COMMENTS_API_URL}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,

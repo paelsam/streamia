@@ -1,3 +1,9 @@
+export interface Subtitle {
+  lang: string;
+  label: string;
+  url: string;
+}
+
 export interface Movie {
   id: string;
   title: string;
@@ -10,6 +16,8 @@ export interface Movie {
   category: string;
   genres: string[];
   isFavorite?: boolean;
+  videoUrl?: string;
+  subtitles?: Subtitle[];
 }
 
 export interface MovieFilters {

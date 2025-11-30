@@ -60,6 +60,7 @@ export const MovieGrid: React.FC<MovieGridProps> = ({
         <MovieCard
           key={movie.id}
           movie={movie}
+          isFavorite={movie.isFavorite}
           onFavoriteToggle={onFavoriteToggle}
           onClick={onMovieClick}
         />

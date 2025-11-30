@@ -1,4 +1,5 @@
 import { TokenManager, eventBus, EVENTS, createLogger } from '@streamia/shared';
+import { API_URL } from '@streamia/shared/config';
 import type { 
   FavoriteItem, 
   AddFavoritePayload, 
@@ -7,7 +8,6 @@ import type {
   RemoveFavoriteResponse 
 } from '../types/favorites.types';
 
-const API_URL =  'http://localhost:3000/api'
 const logger = createLogger('Favorites-MFE');
 
 interface ApiResponse<T = any> {
