@@ -43,6 +43,7 @@ declare -A MFE_PROJECTS=(
     ["static-mfe"]="streamia-static"
     ["comments-mfe"]="streamia-comments"
     ["profile-mfe"]="streamia-profile"
+    ["player-mfe"]="streamia-player"
 )
 SHELL_PROJECT="streamia-shell"
 
@@ -259,6 +260,7 @@ VITE_CATALOG_MFE_URL=https://streamia-catalog.vercel.app/assets/remoteEntry.js
 VITE_FAVORITES_MFE_URL=https://streamia-favorites.vercel.app/assets/remoteEntry.js
 VITE_STATIC_MFE_URL=https://streamia-static.vercel.app/assets/remoteEntry.js
 VITE_COMMENTS_MFE_URL=https://streamia-comments.vercel.app/assets/remoteEntry.js
+VITE_PLAYER_MFE_URL=https://streamia-player.vercel.app/assets/remoteEntry.js
 EOF
     
     print_success "Archivo .env actualizado"
@@ -357,6 +359,7 @@ print_summary() {
     echo "   Favorites: https://streamia-favorites.vercel.app"
     echo "   Static:    https://streamia-static.vercel.app"
     echo "   Comments:  https://streamia-comments.vercel.app"
+    echo "   Player:    https://streamia-player.vercel.app"
     echo ""
     echo -e "${CYAN}🌐 BACKEND:${NC}"
     echo "   ${BACKEND_URL}"

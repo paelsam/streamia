@@ -4,6 +4,8 @@ import { createLogger } from '@streamia/shared/utils';
 
 const API_URL =  'http://localhost:3000/api';
 
+const logger = createLogger('AuthService');
+
 // Log de configuración al iniciar
 logger.info('AuthService initialized', { API_URL });
 
