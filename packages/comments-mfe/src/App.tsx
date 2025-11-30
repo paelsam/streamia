@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getComments, createComment } from "./api";
 import "./styles/comments.scss";
-
+import { useNavigate } from "react-router-dom";
 
 interface Comment {
   _id: string;
@@ -22,6 +22,8 @@ interface CommentsProps {
 export default function Comments({ movieId, token }: CommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     getComments(movieId).then(setComments).catch(console.error);
@@ -69,14 +71,22 @@ export default function Comments({ movieId, token }: CommentsProps) {
   };
 
 
-
-
   return (
     <section className="movie-detail__comments">
-      <h2 className="movie-detail__comments-title">
-        Comentarios
-        <span className="movie-detail__comments-count">({comments.length})</span>
-      </h2>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+        <button
+          className="movie-detail__back-button"
+          style={{ color: "white", padding: "5px", fontSize: "16px", marginRight: "10px" }}
+          onClick={() => navigate(-1)}
+        >
+          ←
+        </button>
+
+        <h2 className="movie-detail__comments-title" style={{ margin: 0 }}>
+          Comentarios
+          <span className="movie-detail__comments-count">({comments.length})</span>
+        </h2>
+      </div>
 
       {/* FORM */}
       <div className="movie-detail__comment-form">
@@ -119,6 +129,5 @@ export default function Comments({ movieId, token }: CommentsProps) {
         )}
       </div>
     </section>
-
   );
 }
