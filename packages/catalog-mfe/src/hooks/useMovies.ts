@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { movieService } from '../services/movieService';
 import { favoritesService } from '../services/favoritesService';
+import { eventBus, EVENTS } from '@streamia/shared/events';
 import type { Movie, MovieFilters } from '../types/movie.types';
 
 export const useMovies = (filters?: MovieFilters) => {
@@ -9,14 +10,12 @@ export const useMovies = (filters?: MovieFilters) => {
   const [error, setError] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-
   const loadMovies = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await movieService.getMovies(filters);
       
-      // Combinar con favoritos
       const moviesWithFavorites = response.movies.map(movie => ({
         ...movie,
         isFavorite: favorites.has(movie.id),
@@ -28,7 +27,7 @@ export const useMovies = (filters?: MovieFilters) => {
     } finally {
       setLoading(false);
     }
-  }, [filters, favorites]); 
+  }, [filters, favorites]);
 
   const loadFavorites = async () => {
     try {
@@ -73,23 +72,25 @@ export const useMovies = (filters?: MovieFilters) => {
 
   useEffect(() => {
     loadMovies();
-  }, [loadMovies]); 
+  }, [loadMovies]);
 
-  // Escuchar eventos de favoritos externos
   useEffect(() => {
-    const unsubscribe = favoritesService.onFavoriteRemoved((movieId) => {
-      setFavorites(prev => {
-        const next = new Set(prev);
-        next.delete(movieId);
-        return next;
-      });
-      
-      setMovies(prev =>
-        prev.map(movie =>
-          movie.id === movieId ? { ...movie, isFavorite: false } : movie
-        )
-      );
-    });
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.FAVORITE_REMOVED,
+      (data: { movieId: string }) => {
+        setFavorites(prev => {
+          const next = new Set(prev);
+          next.delete(data.movieId);
+          return next;
+        });
+        
+        setMovies(prev =>
+          prev.map(movie =>
+            movie.id === data.movieId ? { ...movie, isFavorite: false } : movie
+          )
+        );
+      }
+    );
 
     return unsubscribe;
   }, []);

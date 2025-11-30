@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { eventBus, EVENTS } from '@streamia/shared/events';
 import { MovieGrid } from '../components/MovieGrid';
 import { FilterPanel } from '../components/FilterPanel';
 import { CategorySelector } from '../components/CategorySelector';
@@ -17,7 +18,6 @@ export const MoviesListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Obtener filtros iniciales de la URL
   const initialCategory = searchParams.get('category') || undefined;
   const initialSearch = searchParams.get('search') || undefined;
   const initialGenre = searchParams.get('genre') || undefined;
@@ -50,11 +50,21 @@ export const MoviesListPage: React.FC = () => {
       setSearchQuery(initialSearch);
     }
     
-    setupEventListeners();
+    const unsubscribeAuth = eventBus.subscribe(
+      EVENTS.USER_LOGIN, 
+      handleUserAuthenticated
+    );
+    
+    const unsubscribeFavRemoved = eventBus.subscribe(
+      EVENTS.FAVORITE_REMOVED, 
+      handleFavoriteRemoved
+    );
+
+    logger.info('Event listeners configured via EventBus');
 
     return () => {
-      window.removeEventListener('user:authenticated', handleUserAuthenticated);
-      window.removeEventListener('favorite:removed', handleFavoriteRemoved);
+      unsubscribeAuth();
+      unsubscribeFavRemoved();
     };
   }, []);
 
@@ -66,7 +76,6 @@ export const MoviesListPage: React.FC = () => {
     if (filters.genre) params.set('genre', filters.genre);
     if (filters.rating) params.set('rating', filters.rating.toString());
 
-    // Solo actualizar si hay cambios
     const newSearch = params.toString();
     const currentSearch = searchParams.toString();
     
@@ -84,20 +93,14 @@ export const MoviesListPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery, setSearch]);
 
-  const setupEventListeners = () => {
-    window.addEventListener('user:authenticated', handleUserAuthenticated as EventListener);
-    window.addEventListener('favorite:removed', handleFavoriteRemoved as EventListener);
-    logger.info('Event listeners configured');
-  };
-
-  const handleUserAuthenticated = (event: CustomEvent) => {
-    const { userId, user } = event.detail;
+  const handleUserAuthenticated = (data: { userId: string; user: any }) => {
+    const { userId, user } = data;
     logger.info('User authenticated event received', { userId });
     window.location.reload();
   };
 
-  const handleFavoriteRemoved = (event: CustomEvent) => {
-    const { movieId } = event.detail;
+  const handleFavoriteRemoved = (data: { movieId: string }) => {
+    const { movieId } = data;
     logger.info('Favorite removed event received from external source', { movieId });
   };
 
@@ -109,11 +112,10 @@ export const MoviesListPage: React.FC = () => {
   const handleMovieClick = (movie: any) => {
     logger.info('Movie clicked', { movieId: movie.id, title: movie.title });
     
-    window.dispatchEvent(
-      new CustomEvent('movie:selected', {
-        detail: { movieId: movie.id, movie },
-      })
-    );
+    eventBus.publish(EVENTS.MOVIE_SELECTED, {
+      movieId: movie.id,
+      movie
+    });
     
     navigate(`/movie/${movie.id}`);
   };
@@ -125,7 +127,6 @@ export const MoviesListPage: React.FC = () => {
 
   return (
     <div className="movies-list">
-      {/* Search Header */}
       <div className="movies-list__header">
         <div className="movies-list__search-container">
           <Search size={20} className="movies-list__search-icon" />
@@ -155,7 +156,6 @@ export const MoviesListPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Search Results Info */}
       {filters.search && (
         <div className="movies-list__search-info">
           <h2>
@@ -173,7 +173,6 @@ export const MoviesListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Category Selector */}
       {!filters.search && (
         <div className="movies-list__categories">
           <CategorySelector
@@ -183,9 +182,7 @@ export const MoviesListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content */}
       <div className="movies-list__content">
-        {/* Sidebar Filters - Desktop */}
         <aside className={`movies-list__sidebar ${showFilters ? 'show' : ''}`}>
           <div className="movies-list__sidebar-header">
             <h3>Filtros</h3>
@@ -205,9 +202,7 @@ export const MoviesListPage: React.FC = () => {
           />
         </aside>
 
-        {/* Movies Grid */}
         <main className="movies-list__main">
-          {/* Results Count */}
           <div className="movies-list__results-header">
             <p>
               {loading ? (
@@ -223,7 +218,6 @@ export const MoviesListPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Error State */}
           {error && (
             <div className="movies-list__error">
               <p>Error: {error}</p>
@@ -233,7 +227,6 @@ export const MoviesListPage: React.FC = () => {
             </div>
           )}
 
-          {/* Empty State */}
           {!loading && movies.length === 0 && (
             <div className="movies-list__no-results">
               <Search size={64} />
@@ -253,7 +246,6 @@ export const MoviesListPage: React.FC = () => {
             </div>
           )}
 
-          {/* Movies Grid */}
           {!loading && movies.length > 0 && (
             <MovieGrid
               movies={movies}
@@ -265,7 +257,6 @@ export const MoviesListPage: React.FC = () => {
         </main>
       </div>
 
-      {/* Mobile Filters Overlay */}
       {showFilters && (
         <div
           className="movies-list__overlay"

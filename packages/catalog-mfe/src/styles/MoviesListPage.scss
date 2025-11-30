@@ -110,6 +110,7 @@
   &__content {
     display: flex;
     gap: 2rem;
+    max-width: 1000px;
     padding: 0 2rem;
     max-width: 1800px;
     margin: 0 auto;
@@ -193,6 +194,8 @@
   &__main {
     flex: 1;
     min-width: 0;
+    max-width: 900px;
+    margin: 0 auto;
   }
 
   &__results-header {

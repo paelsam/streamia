@@ -6,9 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || false;
 
 class MovieService {
-  /**
-   * Aplica filtros a las películas mock
-   */
+  //Aplicar filtros
   private applyFilters(movies: Movie[], filters?: MovieFilters): Movie[] {
     let filtered = [...movies];
 
@@ -80,7 +78,7 @@ class MovieService {
   }
 
   /**
-   * Obtener película por ID (intenta backend, fallback a mock)
+   * Obtener película por ID 
    */
   async getMovieById(id: string): Promise<Movie> {
     if (USE_MOCK_DATA) {

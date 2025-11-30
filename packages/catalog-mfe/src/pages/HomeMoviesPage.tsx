@@ -3,14 +3,13 @@ import { Play, Heart, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { movieService } from '../services/movieService';
 import { favoritesService } from '../services/favoritesService';
+import { eventBus, EVENTS } from '@streamia/shared/events';
 import { createLogger } from '@streamia/shared/utils';
 import { MovieCard } from '../components/MovieCard';
 import type { Movie } from '../types/movie.types';
 import '../styles/HomeMoviesPage.scss';
 
 const logger = createLogger('HomeMoviesPage');
-
-
 export const HomeMoviesPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -22,7 +21,7 @@ export const HomeMoviesPage: React.FC = () => {
   const [favoritesIds, setFavoritesIds] = useState<Set<string>>(new Set());
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Fallback featured movies (si la API no devuelve ninguno)
+  // Fallback featured movies
   const fallbackFeaturedMovies = [
     {
       id: "68fe440f0f375de5da710444",
@@ -81,11 +80,22 @@ export const HomeMoviesPage: React.FC = () => {
   useEffect(() => {
     loadMovies();
     loadFavorites();
-    setupEventListeners();
+
+    const unsubscribeAuth = eventBus.subscribe(
+      EVENTS.USER_LOGIN, 
+      handleUserAuthenticated
+    );
+    
+    const unsubscribeFavRemoved = eventBus.subscribe(
+      EVENTS.FAVORITE_REMOVED, 
+      handleFavoriteRemoved
+    );
+
+    logger.info('Event listeners configured via EventBus');
 
     return () => {
-      window.removeEventListener('user:authenticated', handleUserAuthenticated);
-      window.removeEventListener('favorite:removed', handleFavoriteRemoved);
+      unsubscribeAuth();
+      unsubscribeFavRemoved();
     };
   }, []);
 
@@ -97,21 +107,15 @@ export const HomeMoviesPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [featuredMovies.length]);
 
-  const setupEventListeners = () => {
-    window.addEventListener('user:authenticated', handleUserAuthenticated as EventListener);
-    window.addEventListener('favorite:removed', handleFavoriteRemoved as EventListener);
-    logger.info('Event listeners configured');
-  };
-
-  const handleUserAuthenticated = (event: CustomEvent) => {
-    const { userId, user } = event.detail;
+  const handleUserAuthenticated = (data: { userId: string; user: any }) => {
+    const { userId, user } = data;
     logger.info('User authenticated event received', { userId });
     setIsAuthenticated(true);
     loadFavorites();
   };
 
-  const handleFavoriteRemoved = (event: CustomEvent) => {
-    const { movieId } = event.detail;
+  const handleFavoriteRemoved = (data: { movieId: string }) => {
+    const { movieId } = data;
     logger.info('Favorite removed event received', { movieId });
     
     setFavoritesIds(prev => {
@@ -197,7 +201,6 @@ export const HomeMoviesPage: React.FC = () => {
 
       logger.error('Error toggling favorite', error);
       
-      // Solo pedir login si es error de autenticación
       const errorMessage = error instanceof Error ? error.message : '';
       
       if (errorMessage.includes('autenticado') || errorMessage.includes('401')) {
@@ -210,21 +213,19 @@ export const HomeMoviesPage: React.FC = () => {
 
   const handleMovieClick = (movieId: string) => {
     logger.info('Movie selected', { movieId });
-    window.dispatchEvent(
-      new CustomEvent('movie:selected', {
-        detail: { movieId },
-      })
-    );
+    
+    eventBus.publish(EVENTS.MOVIE_SELECTED, { movieId });
+    
     navigate(`/movie/${movieId}`);
   };
 
   const handlePlayMovie = (movie: any) => {
     logger.info('Play movie clicked', { movieId: movie.id });
-    window.dispatchEvent(
-      new CustomEvent('movie:play', {
-        detail: { movieId: movie.id, movie },
-      })
-    );
+    
+    eventBus.publish(EVENTS.MOVIE_PLAY, {
+      movieId: movie.id,
+      movie,
+    });
   };
 
   const nextSlide = () => {
@@ -311,7 +312,6 @@ export const HomeMoviesPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Popular Movies */}
       <section className="homepage__section">
         <h2 className="homepage__section-title">Películas Populares</h2>
         <div className="homepage__movies-grid">
@@ -319,6 +319,7 @@ export const HomeMoviesPage: React.FC = () => {
             <MovieCard
               key={movie.id}
               movie={movie}
+              isFavorite={favoritesIds.has(movie.id)}
               onFavoriteToggle={handleToggleFavorite}
               onClick={() => handleMovieClick(movie.id)}
             />
@@ -326,7 +327,6 @@ export const HomeMoviesPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Trending Movies */}
       <section className="homepage__section">
         <h2 className="homepage__section-title">Tendencias</h2>
         <div className="homepage__movies-grid">
@@ -334,6 +334,7 @@ export const HomeMoviesPage: React.FC = () => {
             <MovieCard
               key={movie.id}
               movie={movie}
+              isFavorite={favoritesIds.has(movie.id)}
               onFavoriteToggle={handleToggleFavorite}
               onClick={() => handleMovieClick(movie.id)}
             />

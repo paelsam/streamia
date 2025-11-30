@@ -102,6 +102,8 @@ export const EVENTS = {
   ROUTE_CHANGE: 'route:change',
   
   // Movie events
+  MOVIE_SELECTED: 'movie:selected',
+  MOVIE_PLAY: 'movie:play',
   FAVORITE_ADDED: 'favorite:added',
   FAVORITE_REMOVED: 'favorite:removed',
   MOVIE_RATED: 'movie:rated',

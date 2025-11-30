@@ -1,4 +1,5 @@
 import { createLogger } from '@streamia/shared/utils';
+import { eventBus, EVENTS } from '@streamia/shared/events';
 import type { FavoritePayload } from '../types/movie.types';
 
 const logger = createLogger('FavoritesService');
@@ -71,7 +72,9 @@ class FavoritesService {
           totalFavorites: this.mockFavorites.size
         });
 
-        this.emitFavoriteAdded(payload.movieId);
+        eventBus.publish(EVENTS.FAVORITE_ADDED, { 
+          movieId: payload.movieId 
+        });
         return;
       }
 
@@ -98,7 +101,9 @@ class FavoritesService {
       const result = await response.json();
       logger.info('Favorite added successfully', { movieId: payload.movieId, result });
 
-      this.emitFavoriteAdded(payload.movieId);
+      eventBus.publish(EVENTS.FAVORITE_ADDED, { 
+        movieId: payload.movieId 
+      });
     } catch (error) {
       logger.error('Error adding favorite', error);
       throw error;
@@ -124,7 +129,9 @@ class FavoritesService {
           totalFavorites: this.mockFavorites.size
         });
 
-        this.emitFavoriteRemoved(movieId);
+        eventBus.publish(EVENTS.FAVORITE_REMOVED, { 
+          movieId 
+        });
         return;
       }
 
@@ -146,13 +153,14 @@ class FavoritesService {
 
       logger.info('Favorite removed successfully', { movieId });
 
-      this.emitFavoriteRemoved(movieId);
+      eventBus.publish(EVENTS.FAVORITE_REMOVED, { 
+        movieId 
+      });
     } catch (error) {
       logger.error('Error removing favorite', error);
       throw error;
     }
   }
-
   /**
    * Get all user favorites
    * Returns array of movie IDs
@@ -199,24 +207,21 @@ class FavoritesService {
       let favoriteIds: string[] = [];
       
       if (Array.isArray(data)) {
-        // Si es un array directo de IDs: ["id1", "id2"]
         favoriteIds = data.map(item => 
           typeof item === 'string' ? item : item.movieId || item.id
         );
       } else if (data.favorites && Array.isArray(data.favorites)) {
-        // Si viene en { favorites: [...] }
         favoriteIds = data.favorites.map((item: any) => 
           typeof item === 'string' ? item : item.movieId || item.id
         );
       } else if (data.data && Array.isArray(data.data)) {
-        // Si viene en { data: [...] }
         favoriteIds = data.data.map((item: any) => 
           typeof item === 'string' ? item : item.movieId || item.id
         );
       }
 
       logger.info('Favorites fetched successfully', { count: favoriteIds.length });
-      return favoriteIds.filter(id => id != null); // Filtrar nulls/undefined
+      return favoriteIds.filter(id => id != null);
     } catch (error) {
       logger.error('Error fetching favorites', error);
       return [];
@@ -232,7 +237,6 @@ class FavoritesService {
         return this.mockFavorites.has(movieId);
       }
 
-      // Modo Backend Real
       const favorites = await this.getFavorites();
       return favorites.includes(movieId);
     } catch (error) {
@@ -270,65 +274,24 @@ class FavoritesService {
     logger.info('Mock favorites cleared');
   }
 
-  /**
-   * Get mock favorites count 
-   */
   getMockFavoritesCount(): number {
     return this.mockFavorites.size;
   }
 
   /**
-   * Emit favorite added event
-   */
-  private emitFavoriteAdded(movieId: string): void {
-    logger.debug('Emitting favorite:added event', { movieId });
-    window.dispatchEvent(
-      new CustomEvent('favorite:added', {
-        detail: { movieId },
-      })
-    );
-  }
-
-  /**
-   * Emit favorite removed event
-   */
-  private emitFavoriteRemoved(movieId: string): void {
-    logger.debug('Emitting favorite:removed event', { movieId });
-    window.dispatchEvent(
-      new CustomEvent('favorite:removed', {
-        detail: { movieId },
-      })
-    );
-  }
-
-  /**
    * Listen to favorite removed events from other MFEs
    */
-  onFavoriteRemoved(callback: (movieId: string) => void): () => void {
-    const handler = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      logger.debug('Received favorite:removed event', { movieId: customEvent.detail.movieId });
-      callback(customEvent.detail.movieId);
-    };
-
-    window.addEventListener('favorite:removed', handler);
-
-    return () => window.removeEventListener('favorite:removed', handler);
+  onFavoriteRemoved(callback: (data: { movieId: string }) => void): () => void {
+    logger.debug('Subscribing to favorite:removed events');
+    return eventBus.subscribe(EVENTS.FAVORITE_REMOVED, callback);
   }
 
   /**
    * Listen to favorite added events from other MFEs
    */
-  onFavoriteAdded(callback: (movieId: string) => void): () => void {
-    const handler = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      logger.debug('Received favorite:added event', { movieId: customEvent.detail.movieId });
-      callback(customEvent.detail.movieId);
-    };
-
-    window.addEventListener('favorite:added', handler);
-
-    return () => window.removeEventListener('favorite:added', handler);
+  onFavoriteAdded(callback: (data: { movieId: string }) => void): () => void {
+    logger.debug('Subscribing to favorite:added events');
+    return eventBus.subscribe(EVENTS.FAVORITE_ADDED, callback);
   }
 }
 

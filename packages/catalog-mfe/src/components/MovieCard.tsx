@@ -4,12 +4,14 @@ import '../styles/MovieCard.scss';
 
 interface MovieCardProps {
   movie: Movie;
+  isFavorite?: boolean;
   onFavoriteToggle?: (movieId: string) => void;
   onClick?: (movie: Movie) => void;
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({
   movie,
+  isFavorite = false,
   onFavoriteToggle,
   onClick,
 }) => {
@@ -74,9 +76,9 @@ export const MovieCard: React.FC<MovieCardProps> = ({
         <button
           onClick={handleFavoriteClick}
           className={`movie-card__favorite ${
-            movie.isFavorite ? 'movie-card__favorite--active' : 'movie-card__favorite--inactive'
+            isFavorite ? 'movie-card__favorite--active' : 'movie-card__favorite--inactive'
           }`}
-          aria-label={movie.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+          aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
         >
           <svg viewBox="0 0 24 24">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
