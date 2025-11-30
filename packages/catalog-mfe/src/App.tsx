@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { HomeMoviesPage } from './pages/HomeMoviesPage';
 import { MoviesListPage } from './pages/MoviesListPage';
 import { createLogger } from '@streamia/shared/utils';
@@ -12,13 +12,12 @@ function App() {
   
   logger.info('Catalog MFE rendered', { path: location.pathname });
 
+  // Determinar qué página mostrar basado en la ruta actual
+  const isMoviesListPage = location.pathname.startsWith('/movies');
+
   return (
     <div className="catalog-app">
-      <Routes>
-        <Route path="/home-movies" element={<HomeMoviesPage />} />
-        <Route path="/movies" element={<MoviesListPage />} />
-        <Route path="*" element={<Navigate to="/home-movies" replace />} />
-      </Routes>
+      {isMoviesListPage ? <MoviesListPage /> : <HomeMoviesPage />}
     </div>
   );
 }

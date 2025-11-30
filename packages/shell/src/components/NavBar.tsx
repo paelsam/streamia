@@ -68,13 +68,14 @@ export const NavBar: React.FC = () => {
 
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           <div className="navbar-links">
-            <Link to="/" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
             {isAuthenticated ? (
               <>
                 <Link to="/movies" onClick={() => setIsMenuOpen(false)}>Películas</Link>
                 <Link to="/favorites" onClick={() => setIsMenuOpen(false)}>Favoritos</Link>
               </>
-            ) : null}
+            ) : (
+              <Link to="/" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
+            )}
             <Link to="/about" onClick={() => setIsMenuOpen(false)}>Acerca de</Link>
             <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contacto</Link>
           </div>
