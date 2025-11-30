@@ -1,9 +1,24 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { TokenManager } from '@streamia/shared/utils';
 import { Features } from '../components/Features';
 import '../styles/home.scss';
 
 export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is authenticated, redirect to movies catalog
+    if (TokenManager.isCurrentTokenValid()) {
+      navigate('/movies', { replace: true });
+    }
+  }, [navigate]);
+
+  // Don't render the page if user is authenticated (will redirect)
+  if (TokenManager.isCurrentTokenValid()) {
+    return null;
+  }
+
   return (
     <div className="home-page">
       <section className="hero-section">

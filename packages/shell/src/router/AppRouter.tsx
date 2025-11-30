@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { GuestRoute } from '../components/GuestRoute';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { createLogger } from '@streamia/shared/utils';
@@ -47,12 +48,11 @@ export const AppRouter: React.FC = () => {
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-              {/* Auth Routes - Auth MFE */}
-              <Route path="/login" element={<AuthMFE />} />
-              <Route path="/register" element={<AuthMFE />} />
-              <Route path="/recover-password" element={<AuthMFE />} />
-              <Route path="/reset-password/*" element={<AuthMFE />} />
-              
+              {/* Auth Routes - Auth MFE (only for guests) */}
+              <Route path="/login" element={<GuestRoute><AuthMFE /></GuestRoute>} />
+              <Route path="/register" element={<GuestRoute><AuthMFE /></GuestRoute>} />
+              <Route path="/recover-password" element={<GuestRoute><AuthMFE /></GuestRoute>} />
+              <Route path="/reset-password/*" element={<GuestRoute><AuthMFE /></GuestRoute>} />
 
               {/* Protected Routes - Placeholder for other MFEs */}
               <Route

@@ -87,8 +87,28 @@ export class EventBus {
   }
 }
 
-// Singleton instance
-export const eventBus = new EventBus();
+// Use a global singleton to ensure all MFEs share the same EventBus instance
+declare global {
+  interface Window {
+    __STREAMIA_EVENT_BUS__?: EventBus;
+  }
+}
+
+// Create or reuse the global EventBus instance
+const getGlobalEventBus = (): EventBus => {
+  if (typeof window !== 'undefined') {
+    if (!window.__STREAMIA_EVENT_BUS__) {
+      window.__STREAMIA_EVENT_BUS__ = new EventBus();
+      console.log('[EventBus] Created new global EventBus instance');
+    }
+    return window.__STREAMIA_EVENT_BUS__;
+  }
+  // Fallback for SSR or non-browser environments
+  return new EventBus();
+};
+
+// Singleton instance shared across all MFEs
+export const eventBus = getGlobalEventBus();
 
 // Event names constants
 export const EVENTS = {

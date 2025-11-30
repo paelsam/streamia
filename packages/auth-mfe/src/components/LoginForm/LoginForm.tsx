@@ -66,14 +66,15 @@ export const LoginForm: React.FC = () => {
       console.log('✅ Login successful, navigating...');
       const { user, token } = response.data;
 
-      
-      
+      // Save token and user to localStorage
       TokenManager.setToken(token);
-      eventBus.publish(EVENTS.USER_LOGIN, user);
-      logger.info('Login successful', { userId: user.id });
-      eventBus.getEvents();
+      localStorage.setItem('user', JSON.stringify(user));
       
-      navigate('/movies');
+      // Publish login event with both user and token
+      eventBus.publish(EVENTS.USER_LOGIN, { user, token });
+      logger.info('Login successful', { userId: user.id });
+      
+      navigate('/');
     } else {
       console.log('⚠️ Response format unexpected:', response);
       setApiError('Error en el formato de respuesta del servidor');

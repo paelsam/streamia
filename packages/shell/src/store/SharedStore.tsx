@@ -20,16 +20,28 @@ export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [token, setTokenState] = useState<string | null>(TokenManager.getToken());
   const [isAuthenticated, setIsAuthenticated] = useState(TokenManager.isCurrentTokenValid());
 
-  // Initialize user from token on mount
+  // Initialize user from localStorage on mount
   useEffect(() => {
     const currentToken = TokenManager.getToken();
+    const storedUser = localStorage.getItem('user');
+    
     if (currentToken && TokenManager.isValidToken(currentToken)) {
-      const payload = TokenManager.getTokenPayload(currentToken);
-      if (payload && payload.user) {
-        setUserState(payload.user);
-        setIsAuthenticated(true);
-        logger.info('User restored from token', { userId: payload.user.id });
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          setUserState(user);
+          setIsAuthenticated(true);
+          logger.info('User restored from localStorage', { userId: user.id });
+        } catch (error) {
+          logger.error('Error parsing stored user', error);
+          TokenManager.removeToken();
+          localStorage.removeItem('user');
+        }
       }
+    } else {
+      // Token invalid or expired, clean up
+      TokenManager.removeToken();
+      localStorage.removeItem('user');
     }
   }, []);
 
@@ -43,6 +55,7 @@ export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ childre
       setTokenState(data.token);
       setIsAuthenticated(true);
       TokenManager.setToken(data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
     });
 
     const unsubLogout = eventBus.subscribe(EVENTS.USER_LOGOUT, () => {
@@ -51,6 +64,7 @@ export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ childre
       setTokenState(null);
       setIsAuthenticated(false);
       TokenManager.removeToken();
+      localStorage.removeItem('user');
     });
 
     const unsubUpdated = eventBus.subscribe(EVENTS.USER_UPDATED, (data: { user: User }) => {
@@ -98,6 +112,7 @@ export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ childre
     setTokenState(null);
     setIsAuthenticated(false);
     TokenManager.removeToken();
+    localStorage.removeItem('user');
     eventBus.publish(EVENTS.USER_LOGOUT);
   };
 
