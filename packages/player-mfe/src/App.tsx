@@ -16,8 +16,8 @@ function App () {
   return (
     <div className="auth-app">
       <Routes>
-        <Route path="/movie/:id" element={<MovieDetailPage />} />
-        <Route path="*" element={<Navigate to="/movie/68fe440f0f375de5da710444" replace />} />
+        <Route path="/movies/:id" element={<MovieDetailPage />} />
+        <Route path="*" element={<Navigate to="/movies/68fe440f0f375de5da710444" replace />} />
       </Routes>
     </div>
   );

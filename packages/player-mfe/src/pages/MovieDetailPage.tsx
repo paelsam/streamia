@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Heart, Star, ArrowLeft } from 'lucide-react';
+import { Play, Heart, Star, ArrowLeft, MessageSquare } from 'lucide-react';
 import Button from '../components/Button';
 import VideoPlayer from '../components/VideoPlayer';
 import { mockMovies } from '../data/mockMovies';
-import { favoritesAPI, ratingsAPI, commentsAPI, apiUtils, Comment } from '@streamia/shared/services/api';
+import { favoritesAPI, ratingsAPI, apiUtils } from '@streamia/shared/services/api';
 import '../styles/movie-detail.scss';
 
 const MovieDetailPage: React.FC = () => {
@@ -16,64 +16,11 @@ const MovieDetailPage: React.FC = () => {
   const [isLoadingVideo, setIsLoadingVideo] = useState<boolean>(false);
   const [videoError, setVideoError] = useState<string | null>(null);
   const [favoritesIds, setFavoritesIds] = useState<Array<string | number>>([]);
-  const [currentUser, setCurrentUser] = useState<string>('');
-  const [currentUserId, setCurrentUserId] = useState<string>('');
   const [userRating, setUserRating] = useState<number>(0);
   const [ratingId, setRatingId] = useState<string | null>(null);
-  
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState<string>('');
-  const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
-  const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
   const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
 
   const movie = mockMovies.find(m => String(m.id) === id);
-
-   // Ensure page starts at the top when entering this screen
-  useEffect(() => {
-    const loadComments = async () => {
-      if (!movie) return;
-      
-      setIsLoadingComments(true);
-      try {
-        const resp = await commentsAPI.getCommentsByMovie(String(movie.id));
-        if (resp.success && resp.data) {
-          setComments(resp.data);
-        } else {
-          console.error('Error loading comments:', resp.error);
-        }
-      } catch (error) {
-        console.error('Error loading comments:', error);
-      } finally {
-        setIsLoadingComments(false);
-      }
-    };
-
-    loadComments();
-  }, [movie]);
-
-
-  useEffect(() => {
-    const loadCurrentUser = () => {
-      const token = apiUtils.getToken();
-      if (token) {
-        try {
-     
-          const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-          setCurrentUserId(tokenPayload.id);
-          const userName = localStorage.getItem('currentUserName');
-          setCurrentUser(userName || 'Usuario');
-        } catch (error) {
-          console.error('Error parsing token:', error);
-          setCurrentUser('Usuario');
-        }
-      } else {
-        setCurrentUser('Invitado');
-      }
-    };
-
-    loadCurrentUser();
-  }, []);
 
   // Ensure page starts at the top when entering this screen
   useEffect(() => {
@@ -86,71 +33,6 @@ const MovieDetailPage: React.FC = () => {
     }
   }, [movie, navigate]);
 
-
-  const handleAddComment = async () => {
-    if (!newComment.trim() || !movie) return;
-    
-    const token = apiUtils.getToken();
-    if (!token) {
-      alert('Inicia sesión para comentar');
-      return;
-    }
-
-    setIsSubmittingComment(true);
-    try {
-      const resp = await commentsAPI.createComment(token, {
-        movieId: String(movie.id),
-        text: newComment.trim()
-      });
-
-      if (resp.success && resp.data) {
-      
-        const commentsResp = await commentsAPI.getCommentsByMovie(String(movie.id));
-        if (commentsResp.success && commentsResp.data) {
-          setComments(commentsResp.data);
-        }
-        setNewComment('');
-      } else {
-        alert(resp.error || 'Error al publicar el comentario');
-      }
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      alert('Error al publicar el comentario');
-    } finally {
-      setIsSubmittingComment(false);
-    }
-  };
-
- 
-  const handleDeleteComment = async (commentId: string) => {
-    const token = apiUtils.getToken();
-    if (!token) return;
-
-    try {
-      const resp = await commentsAPI.deleteComment(token, commentId);
-      if (resp.success) {
-        setComments(prev => prev.filter(comment => comment._id !== commentId));
-      } else {
-        alert(resp.error || 'Error al eliminar el comentario');
-      }
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      alert('Error al eliminar el comentario');
-    }
-  };
-
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  // Resto de tus funciones existentes (mantén todo esto igual)
   const handleRate = async (value: number) => {
     if (!movie) return;
     
@@ -522,97 +404,18 @@ const MovieDetailPage: React.FC = () => {
               Eliminar calificación
             </button>
           </div>
-        </div>
-      </div>
 
-      
-      <section className="movie-detail__comments">
-        <h2 className="movie-detail__comments-title">
-          Comentarios y Reseñas
-          <span className="movie-detail__comments-count">({comments.length})</span>
-        </h2>
-        
-        {/* Formulario para nuevo comentario */}
-        <div className="movie-detail__comment-form">
-          <div className="movie-detail__comment-user-info">
-            <span className="movie-detail__comment-user-label">
-              Comentando como: <strong>{currentUser}</strong>
-            </span>
-          </div>
-          
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Comparte tu opinión sobre esta película..."
-            className="movie-detail__comment-input"
-            rows={4}
-            disabled={isSubmittingComment}
-          />
-          
-          <Button 
-            variant="primary" 
-            size="medium" 
-            onClick={handleAddComment}
-            disabled={!newComment.trim() || isSubmittingComment}
-            className="movie-detail__comment-submit"
+          <Button
+            variant="secondary"
+            size="medium"
+            className="movie-detail__action-btn"
+            onClick={() => navigate(`/movies/${id}/comments`)}
           >
-            {isSubmittingComment ? 'Publicando...' : 'Publicar Comentario'}
+            <MessageSquare size={18} />
+            <span>Comentarios y Reseñas</span>
           </Button>
         </div>
-
-      
-        <div className="movie-detail__comments-list">
-          {isLoadingComments ? (
-            <div className="movie-detail__comments-loading">
-              Cargando comentarios...
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="movie-detail__no-comments">
-              <div className="movie-detail__no-comments-icon">💬</div>
-              <h3>No hay comentarios aún</h3>
-              <p>Sé el primero en compartir tu opinión sobre esta película</p>
-            </div>
-          ) : (
-            comments.map((comment) => (
-              <div key={comment._id} className="movie-detail__comment">
-                <div className="movie-detail__comment-header">
-                  <div className="movie-detail__comment-user">
-                    <div className="movie-detail__comment-avatar">
-                      {comment.userId.firstName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="movie-detail__comment-user-details">
-                      <strong className="movie-detail__comment-username">
-                        {comment.userId.firstName} {comment.userId.lastName}
-                      </strong>
-                      <span className="movie-detail__comment-email">
-                        {comment.userId.email}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="movie-detail__comment-meta">
-                    <span className="movie-detail__comment-time">
-                      {formatDate(comment.createdAt)}
-                      {comment.updatedAt !== comment.createdAt && ' (editado)'}
-                    </span>
-                    {comment.userId._id === currentUserId && (
-                      <button 
-                        onClick={() => handleDeleteComment(comment._id)}
-                        className="movie-detail__comment-delete"
-                        aria-label="Eliminar comentario"
-                        title="Eliminar comentario"
-                        disabled={isSubmittingComment}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <p className="movie-detail__comment-text">{comment.text}</p>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+      </div>
 
       {videoError && (
         <div className="movie-detail__error-modal">
