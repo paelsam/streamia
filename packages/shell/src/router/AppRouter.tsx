@@ -30,6 +30,11 @@ const AuthMFE = loadMicrofrontend(
   'Auth MFE'
 );
 
+const CatalogMFE = loadMicrofrontend(
+  () => import('catalogMFE/App'),
+  'Catalog MFE'
+);
+
 // Load Static MFE
 const StaticMFE = loadMicrofrontend(
   () => import('staticMFE/App'),
@@ -40,6 +45,14 @@ const FavoritesMFE = loadMicrofrontend(
   () => import('favoritesMFE/App'),
   'Favorites MFE'
 );
+
+
+// Load Comments MFE
+const CommentsMFE = loadMicrofrontend(
+  () => import('commentsMFE/App'),
+  'Comments MFE'
+);
+
 
 export const AppRouter: React.FC = () => {
   return (
@@ -53,6 +66,9 @@ export const AppRouter: React.FC = () => {
               <Route path="/register" element={<GuestRoute><AuthMFE /></GuestRoute>} />
               <Route path="/recover-password" element={<GuestRoute><AuthMFE /></GuestRoute>} />
               <Route path="/reset-password/*" element={<GuestRoute><AuthMFE /></GuestRoute>} />
+
+              <Route path="/home-movies" element={<CatalogMFE />} />
+              <Route path="/movies" element={<CatalogMFE />} />
 
               {/* Protected Routes - Placeholder for other MFEs */}
               <Route
@@ -88,6 +104,13 @@ export const AppRouter: React.FC = () => {
                 } 
               />
           
+
+              <Route
+                path="/movies/:id/comments"
+                element={
+                  <CommentsMFE />
+                }
+              />
 
               {/* Static Pages - Static MFE */}
               <Route path="/*" element={<StaticMFE />} />
