@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginSchema, type LoginFormData } from '../../schemas/authSchemas';
 import { authService } from '../../services/authService';
-import { EventBus, EVENTS, TokenManager, createLogger } from '@streamia/shared';
+import { eventBus, EVENTS, TokenManager, createLogger } from '@streamia/shared';
 import './LoginForm.scss';
 
 const logger = createLogger('LoginForm');
@@ -33,48 +33,60 @@ export const LoginForm: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setApiError('');
+  e.preventDefault();
+  console.log('🔍 Form submitted');
+  setApiError('');
 
-    // Validate form
-    const validation = loginSchema.safeParse(formData);
-    if (!validation.success) {
-      const fieldErrors: Partial<Record<keyof LoginFormData, string>> = {};
-      validation.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[error.path[0] as keyof LoginFormData] = error.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
+  console.log('📝 Form data:', formData);
 
-    setIsLoading(true);
-
-    try {
-      const response = await authService.login(formData);
-      
-      if (response.success && response.data) {
-        const { user, token } = response.data;
-        
-        // Store token
-        TokenManager.setToken(token);
-        
-        // Emit login event with both user and token
-        EventBus.publish(EVENTS.USER_LOGIN, { user, token });
-        
-        logger.info('Login successful', { userId: user._id });
-        
-        // Navigate to home
-        navigate('/movies');
+  // Validate form
+  const validation = loginSchema.safeParse(formData);
+  console.log('✅ Validation result:', validation);
+  
+  if (!validation.success) {
+    console.log('❌ Validation errors:', validation.error.errors);
+    const fieldErrors: Partial<Record<keyof LoginFormData, string>> = {};
+    validation.error.errors.forEach((error) => {
+      if (error.path[0]) {
+        fieldErrors[error.path[0] as keyof LoginFormData] = error.message;
       }
-    } catch (error) {
-      logger.error('Login failed', error);
-      setApiError(error instanceof Error ? error.message : 'Error al iniciar sesión');
-    } finally {
-      setIsLoading(false);
+    });
+    setErrors(fieldErrors);
+    return;
+  }
+
+  setIsLoading(true);
+  console.log('🚀 Calling authService.login...');
+
+  try {
+    const response = await authService.login(formData);
+    console.log('📡 API Response:', response);
+    
+    if (response.success && response.data) {
+      console.log('✅ Login successful, navigating...');
+      const { user, token } = response.data;
+
+      
+      
+      TokenManager.setToken(token);
+      eventBus.publish(EVENTS.USER_LOGIN, user);
+      logger.info('Login successful', { userId: user.id });
+      eventBus.getEvents();
+      
+      navigate('/movies');
+    } else {
+      console.log('⚠️ Response format unexpected:', response);
+      setApiError('Error en el formato de respuesta del servidor');
     }
-  };
+  } catch (error) {
+    console.log('❌ Error caught:', error);
+    logger.error('Login failed', error);
+    setApiError(error instanceof Error ? error.message : 'Error al iniciar sesión');
+  } finally {
+    console.log('🏁 Login process finished');
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="login-form-container">

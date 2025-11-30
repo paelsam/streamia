@@ -1,42 +1,51 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { registerSchema, type RegisterFormData } from '../../schemas/authSchemas';
-import { authService } from '../../services/authService';
-import { EventBus, EVENTS, TokenManager, createLogger } from '@streamia/shared';
-import './RegisterForm.scss';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  RegisterInputData,
+  registerSchema,
+  registerFormSchema,
+  type RegisterFormData,
+} from "../../schemas/authSchemas";
+import { authService } from "../../services/authService";
+import { eventBus, EVENTS, TokenManager, createLogger } from "@streamia/shared";
+import "./RegisterForm.scss";
 
-const logger = createLogger('RegisterForm');
+const logger = createLogger("RegisterForm");
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<RegisterFormData>({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    age: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof RegisterInputData, string>>
+  >({});
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState<string>('');
+  const [apiError, setApiError] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     if (errors[name as keyof RegisterFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
-    
+
     if (apiError) {
-      setApiError('');
+      setApiError("");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError('');
+    setApiError("");
 
-    const validation = registerSchema.safeParse(formData);
+    const validation = registerFormSchema.safeParse(formData);
     if (!validation.success) {
       const fieldErrors: Partial<Record<keyof RegisterFormData, string>> = {};
       validation.error.errors.forEach((error) => {
@@ -48,24 +57,32 @@ export const RegisterForm: React.FC = () => {
       return;
     }
 
+    const payload = {
+      ...formData,
+      age: Number(formData.age),
+    };
+
+    console.log('this is the payload:',payload)
+
     setIsLoading(true);
 
     try {
-      const response = await authService.register(formData);
-      
+      const response = await authService.register(payload);
+      console.log('register success response:', response)
       if (response.success && response.data) {
         const { user, token } = response.data;
-        
+
         TokenManager.setToken(token);
-        // Emit login event with both user and token
-        EventBus.publish(EVENTS.USER_LOGIN, { user, token });
-        
-        logger.info('Registration successful', { userId: user._id });
-        navigate('/movies');
+        eventBus.publish(EVENTS.USER_LOGIN, user);
+
+        logger.info("Registration successful", { userId: user.id });
+        navigate("/movies");
       }
     } catch (error) {
-      logger.error('Registration failed', error);
-      setApiError(error instanceof Error ? error.message : 'Error al registrar usuario');
+      logger.error("Registration failed", error);
+      setApiError(
+        error instanceof Error ? error.message : "Error al registrar usuario"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -79,26 +96,37 @@ export const RegisterForm: React.FC = () => {
         </div>
         <h2>Crear Cuenta</h2>
         <p className="subtitle">Únete a la mejor plataforma de streaming</p>
-        
-        {apiError && (
-          <div className="error-message api-error">
-            {apiError}
-          </div>
-        )}
+
+        {apiError && <div className="error-message api-error">{apiError}</div>}
 
         <div className="form-group">
-          <label htmlFor="username">Nombre de usuario</label>
+          <label htmlFor="firstName">Nombre</label>
           <input
             type="text"
-            id="username"
-            name="username"
-            value={formData.username}
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
             onChange={handleChange}
-            className={errors.username ? 'error' : ''}
+            className={errors.firstName ? "error" : ""}
             disabled={isLoading}
           />
-          {errors.username && (
-            <span className="error-message">{errors.username}</span>
+          {errors.firstName && (
+            <span className="error-message">{errors.firstName}</span>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="lastName">Apellido</label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            className={errors.lastName ? "error" : ""}
+            disabled={isLoading}
+          />
+          {errors.lastName && (
+            <span className="error-message">{errors.lastName}</span>
           )}
         </div>
 
@@ -110,12 +138,26 @@ export const RegisterForm: React.FC = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={errors.email ? 'error' : ''}
+            className={errors.email ? "error" : ""}
             disabled={isLoading}
           />
           {errors.email && (
             <span className="error-message">{errors.email}</span>
           )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="age">Edad</label>
+          <input
+            type="text"
+            id="age"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
+            className={errors.age ? "error" : ""}
+            disabled={isLoading}
+          />
+          {errors.age && <span className="error-message">{errors.age}</span>}
         </div>
 
         <div className="form-group">
@@ -126,7 +168,7 @@ export const RegisterForm: React.FC = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className={errors.password ? 'error' : ''}
+            className={errors.password ? "error" : ""}
             disabled={isLoading}
           />
           {errors.password && (
@@ -142,7 +184,7 @@ export const RegisterForm: React.FC = () => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={errors.confirmPassword ? 'error' : ''}
+            className={errors.confirmPassword ? "error" : ""}
             disabled={isLoading}
           />
           {errors.confirmPassword && (
@@ -151,7 +193,7 @@ export const RegisterForm: React.FC = () => {
         </div>
 
         <button type="submit" disabled={isLoading} className="submit-button">
-          {isLoading ? 'Registrando...' : 'Registrarse'}
+          {isLoading ? "Registrando..." : "Registrarse"}
         </button>
 
         <div className="form-links">

@@ -44,7 +44,7 @@ export class EventBus {
    * @param event Event name
    * @param data Event data
    */
-  publish(event: string, data?: any): void {
+   publish(event: string, data?: any): void {
     const callbacks = this.events.get(event);
     console.log(`[EventBus] Publishing "${event}"`, { 
       subscriberCount: callbacks?.length || 0,

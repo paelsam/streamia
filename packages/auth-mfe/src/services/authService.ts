@@ -2,19 +2,17 @@ import { LoginFormData, RegisterFormData, RecoverPasswordFormData, ResetPassword
 import type { ApiResponse, User } from '@streamia/shared/types';
 import { createLogger } from '@streamia/shared/utils';
 
+const API_URL =  'http://localhost:8080/api';
+
 const logger = createLogger('AuthService');
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Log de configuración al iniciar
 logger.info('AuthService initialized', { API_URL });
 
 export const authService = {
   async login(data: LoginFormData): Promise<ApiResponse<{ user: User; token: string }>> {
-    const url = `${API_URL}/users/login`;
-    logger.info('Attempting login', { url, email: data.email });
-    
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,72 +20,95 @@ export const authService = {
         body: JSON.stringify(data),
       });
 
-      logger.info('Login response received', { 
-        status: response.status, 
-        statusText: response.statusText,
-        ok: response.ok 
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        logger.error('Login failed', { status: response.status, error: result });
-        throw new Error(result.message || 'Error al iniciar sesión');
+      // Check content type before parsing
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.message || 'Error al iniciar sesión');
+        }
+        
+        return  {
+          success: true,
+          data: {
+            user: result.user,
+            token: result.token
+          },
+          message: result.message
+        };
+      } else {
+        // Server returned plain text (probably an error)
+        const text = await response.text();
+        throw new Error(text || 'Error del servidor');
       }
-
-      logger.info('Login successful');
-      return result;
+      
     } catch (error) {
-      logger.error('Login error', { 
-        error, 
-        message: error instanceof Error ? error.message : 'Unknown error',
-        url 
-      });
-      throw error;
+      // If it's already an Error, re-throw it
+      if (error instanceof Error) {
+        throw error;
+      }
+      // Otherwise, wrap it
+      throw new Error('Error de conexión con el servidor');
     }
   },
 
   async register(data: RegisterFormData): Promise<ApiResponse<{ user: User; token: string }>> {
-    const url = `${API_URL}/users/register`;
-    logger.info('Attempting register', { url, username: data.username, email: data.email });
-    
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: data.username,
-          email: data.email,
-          password: data.password,
-        }),
-      });
+    // 1. Double check this path. Does your backend require '/api'?
+    // Change '/users/register' to match your backend exactly.
+    const response = await fetch(`${API_URL}/users/register`, { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        age: data.age,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword
+        // Note: I removed confirmPassword as most backends don't want it in the DB payload
+      }),
+    });
 
-      logger.info('Register response received', { 
-        status: response.status, 
-        statusText: response.statusText,
-        ok: response.ok 
-      });
+    const result = await response.json();
 
-      const result = await response.json();
+    console.log('result in registerform:',result)
 
-      if (!response.ok) {
-        logger.error('Register failed', { status: response.status, error: result });
-        throw new Error(result.message || 'Error al registrar usuario');
-      }
+    if (!response.ok) {
+  console.log("Full Server Response:", result); // <--- Add this to see the array in Console
 
-      logger.info('Register successful');
-      return result;
-    } catch (error) {
-      logger.error('Register error', { 
-        error, 
-        message: error instanceof Error ? error.message : 'Unknown error',
-        url 
-      });
-      throw error;
-    }
-  },
+  // 1. If 'message' is an array (common in NestJS/Express validation), join it into a string
+  if (Array.isArray(result.message)) {
+    throw new Error(result.message.join(', '));
+  }
+
+  const errors=result.details.fieldErrors as Record<string, string[]>;
+
+  const message = Object.values(errors)
+  .filter(errorList => errorList.length > 0)
+  .map(errorList => errorList[0])
+  .join(', '); 
+
+  console.log('errors register news:',message)
+  
+  // 2. Otherwise try specific fields
+  const errorMessage = message || result.error || 'Error al registrar usuario';
+  
+  throw new Error(errorMessage);
+}
+
+    return {
+          success: true,
+          data: {
+            user: result.user,
+            token: result.token
+          },
+          message: result.message
+        };
+},
 
   async recoverPassword(data: RecoverPasswordFormData): Promise<ApiResponse<void>> {
     const response = await fetch(`${API_URL}/users/recover-password`, {
