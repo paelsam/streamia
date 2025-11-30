@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { eventBus, EVENTS } from '@streamia/shared/events';
+import { createLogger } from '@streamia/shared/utils';
 import { MovieGrid } from '../components/MovieGrid';
 import { FilterPanel } from '../components/FilterPanel';
 import { CategorySelector } from '../components/CategorySelector';
 import { useMovies } from '../hooks/useMovies';
 import { useFilters } from '../hooks/useFilters';
-import { createLogger } from '@streamia/shared/utils';
 import '../styles/MoviesListPage.scss';
 
 const logger = createLogger('MoviesListPage');
@@ -46,6 +46,7 @@ export const MoviesListPage: React.FC = () => {
 
   useEffect(() => {
     logger.info('Movies list page loaded', { filters });
+    
     if (initialSearch) {
       setSearchQuery(initialSearch);
     }
@@ -60,9 +61,10 @@ export const MoviesListPage: React.FC = () => {
       handleFavoriteRemoved
     );
 
-    logger.info('Event listeners configured via EventBus');
+    logger.debug('Event listeners configured via EventBus');
 
     return () => {
+      logger.debug('Cleaning up event listeners');
       unsubscribeAuth();
       unsubscribeFavRemoved();
     };
@@ -88,20 +90,21 @@ export const MoviesListPage: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearch(searchQuery || undefined);
+      if (searchQuery) {
+        logger.debug('Search query updated with debounce', { query: searchQuery });
+      }
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery, setSearch]);
 
   const handleUserAuthenticated = (data: { userId: string; user: any }) => {
-    const { userId, user } = data;
-    logger.info('User authenticated event received', { userId });
+    logger.info('User authenticated event received', { userId: data.userId });
     window.location.reload();
   };
 
   const handleFavoriteRemoved = (data: { movieId: string }) => {
-    const { movieId } = data;
-    logger.info('Favorite removed event received from external source', { movieId });
+    logger.info('Favorite removed event received from external source', { movieId: data.movieId });
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,8 +124,14 @@ export const MoviesListPage: React.FC = () => {
   };
 
   const handleClearSearch = () => {
+    logger.debug('Clearing search query');
     setSearchQuery('');
     setSearch(undefined);
+  };
+
+  const handleToggleFilters = () => {
+    setShowFilters(!showFilters);
+    logger.debug('Filters panel toggled', { visible: !showFilters });
   };
 
   return (
@@ -149,7 +158,7 @@ export const MoviesListPage: React.FC = () => {
         
         <button
           className="movies-list__filter-toggle"
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={handleToggleFilters}
         >
           <SlidersHorizontal size={20} />
           <span>Filtros</span>

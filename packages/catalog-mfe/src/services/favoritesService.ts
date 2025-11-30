@@ -1,4 +1,5 @@
 import { createLogger } from '@streamia/shared/utils';
+import { TokenManager } from '@streamia/shared/utils';
 import { eventBus, EVENTS } from '@streamia/shared/events';
 import type { FavoritePayload } from '../types/movie.types';
 
@@ -17,7 +18,7 @@ class FavoritesService {
   }
 
   /**
-   * Cargar favoritos
+   * Cargar favoritos desde localStorage
    */
   private loadMockFavoritesFromStorage(): void {
     if (typeof window === 'undefined') return;
@@ -54,7 +55,37 @@ class FavoritesService {
   }
 
   /**
-   * Add a movie to favorites
+   * Obtener headers con autenticación
+   */
+  private getAuthHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    const token = TokenManager.getToken();
+    if (token && TokenManager.isValidToken(token)) {
+      headers['Authorization'] = `Bearer ${token}`;
+      logger.debug('Added auth token to request headers');
+    } else if (token) {
+      logger.warn('Token found but invalid or expired');
+      TokenManager.removeToken();
+    }
+
+    return headers;
+  }
+
+  /**
+   * Verificar si el usuario está autenticado
+   */
+  private isAuthenticated(): boolean {
+    if (USE_MOCK_DATA) {
+      return true; // En modo mock siempre está "autenticado"
+    }
+    return TokenManager.isCurrentTokenValid();
+  }
+
+  /**
+   * Añadir película a favoritos
    */
   async addFavorite(payload: FavoritePayload): Promise<void> {
     try {
@@ -78,12 +109,16 @@ class FavoritesService {
         return;
       }
 
+      // Verificar autenticación antes de hacer request
+      if (!this.isAuthenticated()) {
+        logger.warn('Attempted to add favorite without authentication');
+        throw new Error('Debes iniciar sesión para añadir favoritos');
+      }
+
       // Modo Backend 
       const response = await fetch(`${API_BASE_URL}/favorites`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(payload),
         credentials: 'include',
       });
@@ -91,27 +126,42 @@ class FavoritesService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.message || errorData.error || 'Error al añadir favorito';
+        
         logger.error('Failed to add favorite', { 
           status: response.status, 
-          error: errorMessage 
+          error: errorMessage,
+          movieId: payload.movieId
         });
+
+        // Si es error de autenticación, limpiar token
+        if (response.status === 401) {
+          TokenManager.removeToken();
+          logger.warn('Token invalidated due to 401 response');
+        }
+
         throw new Error(errorMessage);
       }
 
       const result = await response.json();
-      logger.info('Favorite added successfully', { movieId: payload.movieId, result });
+      logger.info('Favorite added successfully', { 
+        movieId: payload.movieId, 
+        response: result 
+      });
 
       eventBus.publish(EVENTS.FAVORITE_ADDED, { 
         movieId: payload.movieId 
       });
     } catch (error) {
-      logger.error('Error adding favorite', error);
+      logger.error('Error adding favorite', { 
+        error, 
+        movieId: payload.movieId 
+      });
       throw error;
     }
   }
 
   /**
-   * Remove a movie from favorites
+   * Eliminar película de favoritos
    */
   async removeFavorite(movieId: string): Promise<void> {
     try {
@@ -135,19 +185,34 @@ class FavoritesService {
         return;
       }
 
+      // Verificar autenticación
+      if (!this.isAuthenticated()) {
+        logger.warn('Attempted to remove favorite without authentication');
+        throw new Error('Debes iniciar sesión para gestionar favoritos');
+      }
+
       // Modo Backend 
       const response = await fetch(`${API_BASE_URL}/favorites/${movieId}`, {
         method: 'DELETE',
+        headers: this.getAuthHeaders(),
         credentials: 'include',
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.message || errorData.error || 'Error al eliminar favorito';
+        
         logger.error('Failed to remove favorite', { 
           status: response.status, 
-          error: errorMessage 
+          error: errorMessage,
+          movieId
         });
+
+        if (response.status === 401) {
+          TokenManager.removeToken();
+          logger.warn('Token invalidated due to 401 response');
+        }
+
         throw new Error(errorMessage);
       }
 
@@ -157,13 +222,13 @@ class FavoritesService {
         movieId 
       });
     } catch (error) {
-      logger.error('Error removing favorite', error);
+      logger.error('Error removing favorite', { error, movieId });
       throw error;
     }
   }
+
   /**
-   * Get all user favorites
-   * Returns array of movie IDs
+   * Obtener todos los favoritos del usuario
    */
   async getFavorites(): Promise<string[]> {
     try {
@@ -180,13 +245,21 @@ class FavoritesService {
         return favoritesArray;
       }
 
+      // Si no hay token válido, devolver array vacío
+      if (!this.isAuthenticated()) {
+        logger.debug('User not authenticated, returning empty favorites');
+        return [];
+      }
+
       // Modo Backend 
       const response = await fetch(`${API_BASE_URL}/favorites`, {
+        headers: this.getAuthHeaders(),
         credentials: 'include',
       });
 
       // Si no está autenticado, devolver array vacío
       if (response.status === 401) {
+        TokenManager.removeToken();
         logger.warn('User not authenticated, returning empty favorites');
         return [];
       }
@@ -194,6 +267,7 @@ class FavoritesService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.message || errorData.error || 'Error al obtener favoritos';
+        
         logger.error('Failed to fetch favorites', { 
           status: response.status, 
           error: errorMessage 
@@ -203,7 +277,7 @@ class FavoritesService {
 
       const data = await response.json();
       
-      // Manejar diferentes formatos de respuesta del backend
+      // Manejar diferentes formatos de respuesta
       let favoriteIds: string[] = [];
       
       if (Array.isArray(data)) {
@@ -220,7 +294,10 @@ class FavoritesService {
         );
       }
 
-      logger.info('Favorites fetched successfully', { count: favoriteIds.length });
+      logger.info('Favorites fetched successfully', { 
+        count: favoriteIds.length 
+      });
+      
       return favoriteIds.filter(id => id != null);
     } catch (error) {
       logger.error('Error fetching favorites', error);
@@ -229,7 +306,7 @@ class FavoritesService {
   }
 
   /**
-   * Check if a movie is in favorites
+   * Verificar si una película está en favoritos
    */
   async isFavorite(movieId: string): Promise<boolean> {
     try {
@@ -240,7 +317,7 @@ class FavoritesService {
       const favorites = await this.getFavorites();
       return favorites.includes(movieId);
     } catch (error) {
-      logger.error('Error checking favorite status', error);
+      logger.error('Error checking favorite status', { error, movieId });
       return false;
     }
   }
@@ -252,6 +329,8 @@ class FavoritesService {
     try {
       const isFav = await this.isFavorite(movieId);
       
+      logger.debug('Toggling favorite', { movieId, currentState: isFav });
+      
       if (isFav) {
         await this.removeFavorite(movieId);
         return false;
@@ -260,13 +339,13 @@ class FavoritesService {
         return true;
       }
     } catch (error) {
-      logger.error('Error toggling favorite', error);
+      logger.error('Error toggling favorite', { error, movieId });
       throw error;
     }
   }
 
   /**
-   * Clear all mock favorites (útil para testing)
+   * Limpiar todos los favoritos mock (útil para testing)
    */
   clearMockFavorites(): void {
     this.mockFavorites.clear();
@@ -274,12 +353,15 @@ class FavoritesService {
     logger.info('Mock favorites cleared');
   }
 
+  /**
+   * Obtener cantidad de favoritos mock
+   */
   getMockFavoritesCount(): number {
     return this.mockFavorites.size;
   }
 
   /**
-   * Listen to favorite removed events from other MFEs
+   * Escuchar eventos de favoritos eliminados desde otros MFEs
    */
   onFavoriteRemoved(callback: (data: { movieId: string }) => void): () => void {
     logger.debug('Subscribing to favorite:removed events');
@@ -287,7 +369,7 @@ class FavoritesService {
   }
 
   /**
-   * Listen to favorite added events from other MFEs
+   * Escuchar eventos de favoritos añadidos desde otros MFEs
    */
   onFavoriteAdded(callback: (data: { movieId: string }) => void): () => void {
     logger.debug('Subscribing to favorite:added events');
