@@ -25,7 +25,7 @@ declare -a MFE_CONFIGS=(
     # "Profile MFE:profile-mfe:3003"
 )
 
-SHELL_PORT=3000
+SHELL_PORT=5000
 SHELL_DIR="shell"
 
 # ============================================

@@ -25,7 +25,7 @@ graph TB
         STATIC[Static MFE<br/>Port 3006]
     end
     
-    BACKEND[Backend API REST<br/>Port 5000]
+    BACKEND[Backend API REST<br/>Port 3000]
     
     Shell --> AUTH
     Shell --> CATALOG
