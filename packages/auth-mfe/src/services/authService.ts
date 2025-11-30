@@ -2,7 +2,7 @@ import { LoginFormData, RegisterFormData, RecoverPasswordFormData, ResetPassword
 import type { ApiResponse, User } from '@streamia/shared/types';
 import { createLogger } from '@streamia/shared/utils';
 
-const API_URL =  'http://localhost:8080/api';
+const API_URL =  'http://localhost:3000/api';
 
 const logger = createLogger('AuthService');
 
