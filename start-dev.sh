@@ -23,6 +23,7 @@ declare -a MFE_CONFIGS=(
     "Favorites MFE:favorites-mfe:3005"
     "Comments MFE:comments-mfe:3007"
     "Catalog MFE:catalog-mfe:3002"
+    "Player MFE:player-mfe:3003"
     # Ejemplo para añadir más:
     # "Movies MFE:movies-mfe:3002"
     # "Profile MFE:profile-mfe:3003"
