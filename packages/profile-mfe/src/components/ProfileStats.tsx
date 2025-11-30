@@ -1,3 +1,4 @@
+// ProfileStats.tsx
 interface Props {
   stats?: {
     watched: number;

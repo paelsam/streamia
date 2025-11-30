@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Profile } from "../types/profile.types";
 import { updateUserProfile } from "../services/userService";
+import toast from "react-hot-toast";
 
 interface Props {
   profile: Profile;
@@ -8,21 +9,21 @@ interface Props {
 }
 
 export default function EditProfileForm({ profile, onUpdated }: Props) {
-  const [name, setName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email);
+  const [firstName, setFirstName] = useState(profile.firstName);
+  const [lastName, setLastName] = useState(profile.lastName);
+  const [age, setAge] = useState(profile.age || 0);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      await updateUserProfile({ name, email });
-      setMessage("Profile updated successfully");
+      await updateUserProfile({ firstName, lastName, age });
+      toast.success("Perfil actualizado correctamente.");
       onUpdated();
     } catch (err: any) {
-      setMessage(err?.response?.data?.error || "Something went wrong");
+      toast.error(err?.response?.data?.error || "Error al actualizar el perfil.");
     }
 
     setSaving(false);
@@ -31,28 +32,36 @@ export default function EditProfileForm({ profile, onUpdated }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ marginBottom: 10 }}>
-        <label>Name</label>
+        <label>Nombre</label>
         <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
         />
       </div>
 
       <div style={{ marginBottom: 10 }}>
-        <label>Email</label>
+        <label>Apellido</label>
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
         />
       </div>
 
-      <button disabled={saving}>
-        {saving ? "Saving..." : "Save changes"}
-      </button>
+      <div style={{ marginBottom: 10 }}>
+        <label>Edad</label>
+        <input
+          type="number"
+          value={age}
+          onChange={(e) => setAge(Number(e.target.value))}
+        />
+      </div>
 
-      {message && <p>{message}</p>}
+      <button
+        disabled={saving}
+        style={{ background: "red", color: "white", padding: "8px 16px" }}
+      >
+        {saving ? "Guardando..." : "Guardar cambios"}
+      </button>
     </form>
   );
 }

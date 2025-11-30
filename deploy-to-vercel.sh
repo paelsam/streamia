@@ -35,13 +35,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="/tmp/streamia-vercel-deploy"
 BACKEND_URL="https://streamia-server.onrender.com/api"
 
-# Nombres de los proyectos en Vercel
+# Nombres de los proyectos en Vercelauth-mfe
 declare -A MFE_PROJECTS=(
     ["auth-mfe"]="streamia-auth"
     ["catalog-mfe"]="streamia-catalog"
     ["favorites-mfe"]="streamia-favorites"
     ["static-mfe"]="streamia-static"
     ["comments-mfe"]="streamia-comments"
+    ["profile-mfe"]="streamia-profile"
 )
 SHELL_PROJECT="streamia-shell"
 

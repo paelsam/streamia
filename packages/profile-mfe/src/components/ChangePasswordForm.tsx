@@ -1,32 +1,33 @@
 import { useState } from "react";
 import { changePassword } from "../services/userService";
+import toast from "react-hot-toast";
 
 export default function ChangePasswordForm() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNew, setConfirmNew] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (newPassword !== confirmNew) {
-      setMessage("Passwords do not match");
+      toast.error("Las contraseñas no coinciden.");
       return;
     }
 
     setLoading(true);
-    setMessage("");
 
     try {
       await changePassword(oldPassword, newPassword);
-      setMessage("Password updated successfully!");
+
+      toast.success("Contraseña actualizada correctamente.");
       setOldPassword("");
       setNewPassword("");
       setConfirmNew("");
+
     } catch (err: any) {
-      setMessage(err.message || "Error changing password");
+      toast.error(err.message || "Error al cambiar la contraseña.");
     }
 
     setLoading(false);
@@ -34,10 +35,9 @@ export default function ChangePasswordForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Change Password</h3>
 
       <div style={{ marginBottom: 10 }}>
-        <label>Current Password</label>
+        <label>Contraseña Actual</label>
         <input
           type="password"
           value={oldPassword}
@@ -47,7 +47,7 @@ export default function ChangePasswordForm() {
       </div>
 
       <div style={{ marginBottom: 10 }}>
-        <label>New Password</label>
+        <label>Nueva Contraseña</label>
         <input
           type="password"
           value={newPassword}
@@ -57,7 +57,7 @@ export default function ChangePasswordForm() {
       </div>
 
       <div style={{ marginBottom: 10 }}>
-        <label>Confirm New Password</label>
+        <label>Confirmar Nueva Contraseña</label>
         <input
           type="password"
           value={confirmNew}
@@ -66,11 +66,12 @@ export default function ChangePasswordForm() {
         />
       </div>
 
-      <button disabled={loading}>
-        {loading ? "Saving..." : "Update Password"}
+      <button
+        disabled={loading}
+        style={{ background: "red", color: "white", padding: "8px 16px" }}
+      >
+        {loading ? "Guardando..." : "Actualizar Contraseña"}
       </button>
-
-      {message && <p>{message}</p>}
     </form>
   );
 }

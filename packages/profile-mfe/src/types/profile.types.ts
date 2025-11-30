@@ -1,6 +1,9 @@
 export interface Profile {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  age?: number;
+  name?: string;
   email: string;
   avatarUrl?: string;
   subscriptionPlan?: string;

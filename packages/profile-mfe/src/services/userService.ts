@@ -1,4 +1,5 @@
 import api from "./api";
+import { TokenManager } from "@streamia/shared/utils";
 import { Profile } from "../types/profile.types";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
@@ -8,7 +9,7 @@ export const loginUser = async (email: string, password: string) => {
   const res = await api.post("/users/login", { email, password });
 
   if (res.data.token) {
-    localStorage.setItem("token", res.data.token);
+    TokenManager.setToken(res.data.token);
   }
 
   return res.data;
@@ -41,7 +42,7 @@ export const updateUserProfile = async (data: Partial<Profile>) => {
 
 // CHANGE PASSWORD
 export const changePassword = async (oldPassword: string, newPassword: string) => {
-  const token = localStorage.getItem("token");
+  const token = TokenManager.getToken();
   if (!token) throw new Error("No token found");
 
   const response = await fetch(`${API_URL}/users/change-password`, {
@@ -50,7 +51,10 @@ export const changePassword = async (oldPassword: string, newPassword: string) =
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ oldPassword, newPassword }),
+    body: JSON.stringify({
+      currentPassword: oldPassword,
+      newPassword: newPassword,
+    }),
   });
 
   if (!response.ok) {
@@ -62,15 +66,17 @@ export const changePassword = async (oldPassword: string, newPassword: string) =
 };
 
 // DELETE ACCOUNT
-export const deleteAccount = async () => {
-  const token = localStorage.getItem("token");
+export const deleteAccount = async (password: string) => {
+  const token = TokenManager.getToken();
   if (!token) throw new Error("No token provided");
 
   const response = await fetch(`${API_URL}/users/me`, {
     method: "DELETE",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({ password }),
   });
 
   if (!response.ok) {
@@ -78,12 +84,11 @@ export const deleteAccount = async () => {
     throw new Error(error.error || "Failed to delete account");
   }
 
-  return response.json();
+  // Backend returns 204 → NO CONTENT
+  return true; // delete account successful
 };
-
 
 // LOGOUT
 export const logoutUser = () => {
-  localStorage.removeItem("token");
+  TokenManager.removeToken();
 };
-
