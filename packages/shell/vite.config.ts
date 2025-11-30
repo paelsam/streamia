@@ -14,7 +14,7 @@ export default defineConfig({
         staticMFE: process.env.VITE_STATIC_MFE_URL || 'http://localhost:3006/assets/remoteEntry.js',
         commentsMFE: process.env.VITE_COMMENT_MFE_URL || 'http://localhost:3007/assets/remoteEntry.js',
         // Add more microfrontends here as they are created
-        // catalogMFE: process.env.VITE_CATALOG_MFE_URL || 'http://localhost:3003/assets/remoteEntry.js',
+        catalogMFE: process.env.VITE_CATALOG_MFE_URL || 'http://localhost:3002/assets/remoteEntry.js',
         // playerMFE: process.env.VITE_PLAYER_MFE_URL || 'http://localhost:3004/assets/remoteEntry.js',
       },
       shared: {

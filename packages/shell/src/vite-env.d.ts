@@ -5,6 +5,11 @@ declare module 'authMFE/App' {
   export default App;
 }
 
+declare module 'catalogMFE/App' {
+  const App: React.ComponentType;
+  export default App;
+}
+
 declare module 'staticMFE/App' {
   const App: React.ComponentType;
   export default App;
