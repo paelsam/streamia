@@ -53,6 +53,12 @@ const CommentsMFE = loadMicrofrontend(
   'Comments MFE'
 );
 
+// Load Profile MFE
+const ProfileMFE = loadMicrofrontend(
+  () => import('profileMFE/App'),
+  'Profile MFE'
+);
+
 
 export const AppRouter: React.FC = () => {
   return (
@@ -77,14 +83,10 @@ export const AppRouter: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <div>Profile MFE (To be implemented)</div>
-                  </ProtectedRoute>
-                }
-              />
+
+              {/*Profile Routes - Profile MFE */}
+              <Route path="/profile/*" element={<ProfileMFE />} />
+              
               <Route 
                 path="/favorites/*" 
                 element={
