@@ -85,11 +85,90 @@
             h3 {
               font-size: 1.5rem;
               color: #ffffff;
-              margin-bottom: 1rem;
+              margin-bottom: 1.5rem;
             }
 
-            p {
-              color: #b3b3b3;
+            .success-message {
+              background: #22c55e;
+              color: #ffffff;
+              padding: 1rem;
+              border-radius: 6px;
+              margin-bottom: 1.5rem;
+              font-weight: 500;
+            }
+
+            form {
+              .form-group {
+                margin-bottom: 1.5rem;
+
+                label {
+                  display: block;
+                  color: #ffffff;
+                  font-size: 0.95rem;
+                  margin-bottom: 0.5rem;
+                  font-weight: 500;
+                }
+
+                input,
+                textarea {
+                  width: 100%;
+                  padding: 0.75rem;
+                  background: #0f0f0f;
+                  border: 2px solid #333;
+                  border-radius: 6px;
+                  color: #ffffff;
+                  font-size: 1rem;
+                  font-family: inherit;
+                  transition: border-color 0.3s ease;
+
+                  &:focus {
+                    outline: none;
+                    border-color: #e50914;
+                  }
+
+                  &::placeholder {
+                    color: #666;
+                  }
+
+                  &.error {
+                    border-color: #ef4444;
+                  }
+                }
+
+                textarea {
+                  resize: vertical;
+                  min-height: 120px;
+                }
+
+                .error-message {
+                  display: block;
+                  color: #ef4444;
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                }
+              }
+
+              .submit-btn {
+                width: 100%;
+                padding: 0.9rem;
+                background: #e50914;
+                color: #ffffff;
+                border: none;
+                border-radius: 6px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s ease;
+
+                &:hover:not(:disabled) {
+                  background: #b00710;
+                }
+
+                &:disabled {
+                  opacity: 0.6;
+                  cursor: not-allowed;
+                }
+              }
             }
           }
         }

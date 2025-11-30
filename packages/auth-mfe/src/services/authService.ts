@@ -2,9 +2,7 @@ import { LoginFormData, RegisterFormData, RecoverPasswordFormData, ResetPassword
 import type { ApiResponse, User } from '@streamia/shared/types';
 import { createLogger } from '@streamia/shared/utils';
 
-import { API_URL } from '@streamia/shared/config';
-
-const logger = createLogger('AuthService');
+const API_URL =  'http://localhost:3000/api';
 
 // Log de configuración al iniciar
 logger.info('AuthService initialized', { API_URL });
@@ -27,7 +25,7 @@ export const authService = {
         const result = await response.json();
         
         if (!response.ok) {
-          throw new Error(result.error || result.message || 'Error al iniciar sesión');
+          throw new Error(result.message || 'Error al iniciar sesión');
         }
         
         return  {
@@ -146,39 +144,5 @@ export const authService = {
     }
 
     return result;
-  },
-
-  async logout(authToken: string): Promise<ApiResponse<void>> {
-    try {
-      const response = await fetch(`${API_URL}/users/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-      });
-
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType && contentType.includes('application/json')) {
-        const result = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(result.message || 'Error al cerrar sesión');
-        }
-        
-        return {
-          success: true,
-          message: result.message || 'Sesión cerrada correctamente'
-        };
-      }
-      
-      return { success: true, message: 'Sesión cerrada correctamente' };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Error de conexión con el servidor');
-    }
   },
 };
