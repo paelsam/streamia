@@ -26,7 +26,7 @@ declare -a MFE_CONFIGS=(
     "Player MFE:player-mfe:3003"
     # Ejemplo para añadir más:
     # "Movies MFE:movies-mfe:3002"
-    # "Profile MFE:profile-mfe:3003"
+    "Profile MFE:profile-mfe:3004"
 )
 
 SHELL_PORT=5000
