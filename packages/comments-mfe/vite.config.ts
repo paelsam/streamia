@@ -9,9 +9,8 @@ export default defineConfig({
       name: 'commentsMFE',
       filename: 'remoteEntry.js',
       exposes: {
-         "./mount": "./src/main.tsx",
-        // Expón otros componentes si es necesario
-        // './MovieList': './src/components/MovieList.tsx',
+        "./App": "./src/App.tsx",
+        "./mount": "./src/main.tsx",
       },
       shared: ['react', 'react-dom', 'react-router-dom'],
     }),

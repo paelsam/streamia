@@ -92,7 +92,7 @@ export const AppRouter: React.FC = () => {
               />
 
               <Route
-                path="/comments"
+                path="/movies/:id/comments"
                 element={
                   <CommentsMFE />
                 }

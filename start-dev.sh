@@ -20,6 +20,7 @@ NC='\033[0m' # No Color
 declare -a MFE_CONFIGS=(
     "Auth MFE:auth-mfe:3001"
     "Static MFE:static-mfe:3006"
+    "Comments MFE:comments-mfe:3007"
     # Ejemplo para añadir más:
     # "Movies MFE:movies-mfe:3002"
     # "Profile MFE:profile-mfe:3003"

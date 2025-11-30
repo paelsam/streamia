@@ -13,7 +13,7 @@ export const MFE_CONFIG = {
   comments: {
     name: 'commentsMFE',
     url: import.meta.env.DEV ? 'http://localhost:3007' : '/comments',
-    routes: ['/movie/:id/comments'],
+    routes: ['/movies/:id/comments'],
   },
   // Add more microfrontends here as they are created
   // catalog: {
