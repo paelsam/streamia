@@ -105,9 +105,9 @@ const MovieDetailPage: React.FC = () => {
     try {
       // Backend may identify movies by different ids (numeric internal id, cloudinary public id, etc.)
       // Prefer explicit cloudinary/public id fields when available on the movie object.
-      const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://stremiaserver.onrender.com/api';
       const identifier = (movie as any).cloudinaryId || (movie as any).public_id || movie.id;
-      const url = `${apiUrl}/api/movies/${identifier}`;
+      const url = `${apiUrl}/movies/${identifier}`;
 
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Response status: ${response.status}`);
