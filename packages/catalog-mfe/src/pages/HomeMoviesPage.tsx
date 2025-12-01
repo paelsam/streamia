@@ -287,6 +287,9 @@ export const HomeMoviesPage: React.FC = () => {
       movieId: movie.id,
       movie,
     });
+
+    navigate(`/movies/${movie.id}/watch`);
+      
   };
 
   const nextSlide = () => {
