@@ -66,10 +66,9 @@ export const LoginForm: React.FC = () => {
       console.log('✅ Login successful, navigating...');
       const { user, token } = response.data;
 
-      
-      
       TokenManager.setToken(token);
-      eventBus.publish(EVENTS.USER_LOGIN, user);
+      localStorage.setItem('user', JSON.stringify(user));
+      eventBus.publish(EVENTS.USER_LOGIN, { user, token });
       logger.info('Login successful', { userId: user.id });
       eventBus.getEvents();
       

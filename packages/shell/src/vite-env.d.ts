@@ -54,6 +54,11 @@ declare module 'profileMFE/App' {
   export default App;
 }
 
+declare module 'playerMFE/App' {
+  const App: React.ComponentType;
+  export default App;
+}
+
 
 interface ImportMetaEnv {
   readonly DEV: boolean;

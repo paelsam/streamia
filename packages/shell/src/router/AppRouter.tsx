@@ -59,6 +59,12 @@ const ProfileMFE = loadMicrofrontend(
   'Profile MFE'
 );
 
+// Load Player MFE
+const PlayerMFE = loadMicrofrontend(
+  () => import('playerMFE/App'),
+  'Player MFE'
+);
+
 
 export const AppRouter: React.FC = () => {
   return (
@@ -73,16 +79,26 @@ export const AppRouter: React.FC = () => {
               <Route path="/recover-password" element={<GuestRoute><AuthMFE /></GuestRoute>} />
               <Route path="/reset-password/*" element={<GuestRoute><AuthMFE /></GuestRoute>} />
 
-              {/* Catalog MFE Routes */}
-              <Route path="/movies/*" element={<CatalogMFE />} />
+              {/* Player MFE Routes - Must be before /movies/* */}
               <Route
-                path="/movie/:id"
+                path="/movies/:id/watch"
                 element={
                   <ProtectedRoute>
-                    <div>Player MFE (To be implemented)</div>
+                    <PlayerMFE />
                   </ProtectedRoute>
                 }
               />
+
+              {/* Comments MFE Routes - Must be before /movies/* */}
+              <Route
+                path="/movies/:id/comments"
+                element={
+                  <CommentsMFE />
+                }
+              />
+
+              {/* Catalog MFE Routes */}
+              <Route path="/movies/*" element={<CatalogMFE />} />
 
               {/*Profile Routes - Profile MFE */}
               <Route path="/profile/*" element={<ProfileMFE />} />
@@ -94,14 +110,6 @@ export const AppRouter: React.FC = () => {
                     <FavoritesMFE />
                   </ProtectedRoute>
                 } 
-              />
-          
-
-              <Route
-                path="/movies/:id/comments"
-                element={
-                  <CommentsMFE />
-                }
               />
 
               {/* Static Pages - Static MFE */}

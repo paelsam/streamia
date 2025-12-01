@@ -1,24 +1,19 @@
-
 import MovieDetailPage from "./pages/MovieDetailPage";
 import "./App.scss";
-import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
+function App() {
+  const { id } = useParams<{ id: string }>();
 
-
-
-
-function App () {
   useEffect(() => {
     document.title = "STREAMIA - Reproductor de Video";
-  }, []);
+    console.log('[Player-MFE] Loaded with movie ID:', id);
+  }, [id]);
 
   return (
-    <div className="auth-app">
-      <Routes>
-        <Route path="/movies/:id" element={<MovieDetailPage />} />
-        <Route path="*" element={<Navigate to="/movies/68fe440f0f375de5da710444" replace />} />
-      </Routes>
+    <div className="player-app">
+      <MovieDetailPage />
     </div>
   );
 }

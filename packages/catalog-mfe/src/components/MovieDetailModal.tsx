@@ -50,14 +50,15 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
   const handlePlayClick = () => {
     if (movie) {
       console.log('Play movie:', movie.id);
-      // TODO: Implementar reproducción
+      navigate(`/movies/${movie.id}/watch`);
+      onClose();
     }
   };
 
   const handleCommentsClick = () => {
     if (movie) {
       // Navegar al microfrontend de comentarios
-      navigate(`/comments/${movie.id}`);
+      navigate(`/movies/${movie.id}/comments`);
       onClose();
     }
   };

@@ -15,33 +15,60 @@ interface SharedStoreContext extends AuthState {
 
 const SharedStoreContext = createContext<SharedStoreContext | undefined>(undefined);
 
-export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUserState] = useState<User | null>(null);
-  const [token, setTokenState] = useState<string | null>(TokenManager.getToken());
-  const [isAuthenticated, setIsAuthenticated] = useState(TokenManager.isCurrentTokenValid());
+// Helper to get initial state from localStorage
+const getInitialUser = (): User | null => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    const token = TokenManager.getToken();
+    if (storedUser && token && TokenManager.isValidToken(token)) {
+      return JSON.parse(storedUser);
+    }
+  } catch (error) {
+    logger.error('Error getting initial user', error);
+  }
+  return null;
+};
 
-  // Initialize user from localStorage on mount
+const getInitialAuth = (): boolean => {
+  const token = TokenManager.getToken();
+  const user = localStorage.getItem('user');
+  return !!(token && TokenManager.isValidToken(token) && user);
+};
+
+export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUserState] = useState<User | null>(getInitialUser);
+  const [token, setTokenState] = useState<string | null>(() => TokenManager.getToken());
+  const [isAuthenticated, setIsAuthenticated] = useState(getInitialAuth);
+
+  // Log initial state
+  useEffect(() => {
+    logger.info('SharedStore initialized', { 
+      isAuthenticated, 
+      hasUser: !!user, 
+      hasToken: !!token,
+      userName: user?.firstName 
+    });
+  }, []);
+
+  // Clean up invalid state on mount
   useEffect(() => {
     const currentToken = TokenManager.getToken();
     const storedUser = localStorage.getItem('user');
     
-    if (currentToken && TokenManager.isValidToken(currentToken)) {
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          setUserState(user);
-          setIsAuthenticated(true);
-          logger.info('User restored from localStorage', { userId: user.id });
-        } catch (error) {
-          logger.error('Error parsing stored user', error);
-          TokenManager.removeToken();
-          localStorage.removeItem('user');
-        }
-      }
-    } else {
+    if (!currentToken || !TokenManager.isValidToken(currentToken)) {
       // Token invalid or expired, clean up
+      logger.info('Cleaning up invalid token state');
       TokenManager.removeToken();
       localStorage.removeItem('user');
+      setUserState(null);
+      setTokenState(null);
+      setIsAuthenticated(false);
+    } else if (currentToken && !storedUser) {
+      // Token exists but no user, clean up
+      logger.info('Token exists but no user, cleaning up');
+      TokenManager.removeToken();
+      setTokenState(null);
+      setIsAuthenticated(false);
     }
   }, []);
 
@@ -49,13 +76,19 @@ export const SharedStoreProvider: React.FC<{ children: ReactNode }> = ({ childre
   useEffect(() => {
     logger.info('Setting up event subscriptions');
 
-    const unsubLogin = eventBus.subscribe(EVENTS.USER_LOGIN, (data: { user: User; token: string }) => {
-      logger.info('USER_LOGIN event received', { userId: data.user.id });
-      setUserState(data.user);
-      setTokenState(data.token);
+    const unsubLogin = eventBus.subscribe(EVENTS.USER_LOGIN, (data: { user: User; token: string } | User) => {
+      // Handle both formats: { user, token } or just user (for backwards compatibility)
+      const userData = 'user' in data && data.user ? data.user : data as User;
+      const tokenData = 'token' in data ? data.token : TokenManager.getToken();
+      
+      logger.info('USER_LOGIN event received', { userId: userData.id, hasToken: !!tokenData });
+      setUserState(userData);
+      if (tokenData) {
+        setTokenState(tokenData);
+        TokenManager.setToken(tokenData);
+      }
       setIsAuthenticated(true);
-      TokenManager.setToken(data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(userData));
     });
 
     const unsubLogout = eventBus.subscribe(EVENTS.USER_LOGOUT, () => {

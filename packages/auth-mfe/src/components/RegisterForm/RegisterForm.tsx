@@ -73,7 +73,8 @@ export const RegisterForm: React.FC = () => {
         const { user, token } = response.data;
 
         TokenManager.setToken(token);
-        eventBus.publish(EVENTS.USER_LOGIN, user);
+        localStorage.setItem('user', JSON.stringify(user));
+        eventBus.publish(EVENTS.USER_LOGIN, { user, token });
 
         logger.info("Registration successful", { userId: user.id });
         navigate("/movies");

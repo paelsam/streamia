@@ -261,6 +261,7 @@ VITE_FAVORITES_MFE_URL=https://streamia-favorites.vercel.app/assets/remoteEntry.
 VITE_STATIC_MFE_URL=https://streamia-static.vercel.app/assets/remoteEntry.js
 VITE_COMMENTS_MFE_URL=https://streamia-comments.vercel.app/assets/remoteEntry.js
 VITE_PLAYER_MFE_URL=https://streamia-player.vercel.app/assets/remoteEntry.js
+VITE_PROFILE_MFE_URL=https://streamia-profile.vercel.app/assets/remoteEntry.js
 EOF
     
     print_success "Archivo .env actualizado"
