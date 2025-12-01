@@ -2,7 +2,7 @@ import { useState } from "react";
 import { deleteAccount } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useSharedStore } from "../../../shell/src/store/SharedStore";
+import { eventBus, EVENTS } from "@streamia/shared";
 
 interface Props {
   onDeleted: () => void;
@@ -14,7 +14,6 @@ export default function DeleteAccountModal({ onDeleted }: Props) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const { logout } = useSharedStore();
   const navigate = useNavigate();
 
 
@@ -39,7 +38,8 @@ export default function DeleteAccountModal({ onDeleted }: Props) {
 
       toast.success("Cuenta eliminada correctamente.");
 
-      logout();
+      // Use EventBus to notify shell about logout
+      eventBus.publish(EVENTS.USER_LOGOUT);
       navigate('/login');
 
       setOpen(false);
