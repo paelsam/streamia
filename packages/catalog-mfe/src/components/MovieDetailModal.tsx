@@ -57,7 +57,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
   const handleCommentsClick = () => {
     if (movie) {
       // Navegar al microfrontend de comentarios
-      navigate(`/comments/${movie.id}`);
+      navigate(`/movies/${movie.id}/comments`);
       onClose();
     }
   };
