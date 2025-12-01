@@ -35,7 +35,7 @@ graph TB
     end
     
     subgraph "Backend"
-        API[API Server<br/>streamia-server.onrender.com]
+        API[API Server<br/>https://stremiaserver.onrender.com]
         DB[(MongoDB)]
     end
     
@@ -552,7 +552,7 @@ npm install
 
 | Variable | Descripcion | Ejemplo |
 |----------|-------------|---------|
-| `VITE_API_URL` | URL del backend API | `https://streamia-server.onrender.com/api` |
+| `VITE_API_URL` | URL del backend API | `https://stremiaserver.onrender.com/api` |
 | `VITE_AUTH_MFE_URL` | URL del remoteEntry de Auth | `https://streamia-auth.vercel.app/assets/remoteEntry.js` |
 | `VITE_CATALOG_MFE_URL` | URL del remoteEntry de Catalog | `https://streamia-catalog.vercel.app/assets/remoteEntry.js` |
 | `VITE_FAVORITES_MFE_URL` | URL del remoteEntry de Favorites | `https://streamia-favorites.vercel.app/assets/remoteEntry.js` |
