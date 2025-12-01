@@ -1,0 +1,228 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.movie-card {
+  flex: 0 0 200px;
+  @include flex-column;
+  align-items: center;
+  text-align: center;
+  transition: all $transition-normal;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-8px);
+    
+    .movie-card__poster {
+      border: 2px solid #ffffff;
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(255, 255, 255, 0.2);
+      
+      .movie-card__image {
+        transform: scale(1.1);
+      }
+    }
+
+    .movie-card__overlay {
+      opacity: 1;
+    }
+  }
+
+  @include mobile {
+    flex: 0 0 150px;
+  }
+
+  &__poster {
+    width: 100%;
+    height: 280px;
+    border-radius: 0;
+    margin-bottom: 0.75rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: $shadow-lg;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.2) 50%,
+      rgba(0, 0, 0, 0.4) 100%
+    ), var(--background-image);
+    transition: all $transition-normal;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    @include mobile {
+      height: 220px;
+    }
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform $transition-normal;
+    border-radius: 0;
+  }
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 60%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
+    opacity: 0;
+    transition: opacity $transition-normal;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+  }
+
+  &:hover &__overlay {
+    opacity: 1;
+  }
+
+  &__play-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: #e50914;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all $transition-fast;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: auto;
+
+    &:hover {
+      background: #ff6b6b;
+      transform: scale(1.1);
+    }
+  }
+
+  &:hover &__play-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &__favorite-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    border: none;
+    cursor: pointer;
+    transition: all $transition-fast;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2;
+
+    svg {
+      display: block;
+      path:first-child {
+        fill: #111827;
+        opacity: 0.9;
+      }
+      path:last-child {
+        fill: #ffffff;
+      }
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      background: rgba(229, 9, 20, 0.8);
+    }
+  }
+
+  &__favorite-badge.is-favorite {
+    background: #e50914;
+
+    svg path:last-child {
+      fill: #ffffff;
+    }
+  }
+
+  &__click-target {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 1;
+    border-radius: 0;
+  }
+
+  &__info {
+    padding: 0;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  &__title {
+    color: $text-primary;
+    font-size: 0.9rem;
+    font-weight: $font-weight-semibold;
+    margin: 0;
+    @include text-ellipsis;
+    max-width: 100%;
+    line-height: 1.3;
+    padding: 0 4px;
+
+    @include mobile {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.homepage .movie-card,
+.home-movies .movie-card,
+.favorites .movie-card {
+  border-radius: 0;
+  
+  .movie-card__poster,
+  .movie-card__image,
+  .movie-card__overlay,
+  .movie-card__info {
+    border-radius: 0;
+  }
+}
+
+.movie-card,
+.movie-card * {
+  border-radius: 0;
+}
+
+.movie-card__favorite-badge,
+.movie-card__play-btn {
+  border-radius: 50%;
+}
+
+.movie-card img {
+  border-radius: 0;
+}

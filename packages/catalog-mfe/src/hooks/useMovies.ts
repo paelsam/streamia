@@ -12,47 +12,63 @@ export const useMovies = (filters?: MovieFilters) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
 
-  const loadMovies = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      logger.info('Loading movies', { filters });
+  // Cargar favoritos al montar
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        logger.info('Loading favorites on mount');
+        const favIds = await favoritesService.getFavorites();
+        setFavorites(new Set(favIds));
+        setFavoritesLoaded(true);
+        logger.info('Favorites loaded', { count: favIds.length, ids: favIds });
+      } catch (err) {
+        logger.error('Error loading favorites', err);
+        setFavoritesLoaded(true); // Marcar como cargado aunque falle
+      }
+    };
+    
+    loadFavorites();
+  }, []); // Solo al montar
 
-      const response = await movieService.getMovies(filters);
-      
-      const moviesWithFavorites = response.movies.map(movie => ({
-        ...movie,
-        isFavorite: favorites.has(movie.id),
-      }));
-      
-      setMovies(moviesWithFavorites);
-      
-      logger.info('Movies loaded successfully', { 
-        count: moviesWithFavorites.length 
-      });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      logger.error('Error loading movies', { error: err, filters });
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+  // Cargar películas cuando cambien los filtros O cuando se carguen los favoritos
+  useEffect(() => {
+    if (!favoritesLoaded) {
+      return; // Esperar a que los favoritos se carguen primero
     }
-  }, [filters, favorites]);
 
-  const loadFavorites = async () => {
-    try {
-      logger.info('Loading favorites');
-      
-      const favIds = await favoritesService.getFavorites();
-      setFavorites(new Set(favIds));
-      
-      logger.info('Favorites loaded successfully', { count: favIds.length });
-    } catch (err) {
-      logger.error('Error loading favorites', err);
-    }
-  };
+    const loadMovies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        logger.info('Loading movies', { filters, favoritesCount: favorites.size });
+
+        const response = await movieService.getMovies(filters);
+        
+        const moviesWithFavorites = response.movies.map(movie => ({
+          ...movie,
+          isFavorite: favorites.has(movie.id),
+        }));
+        
+        setMovies(moviesWithFavorites);
+        
+        logger.info('Movies loaded successfully', { 
+          count: moviesWithFavorites.length,
+          favoritesCount: favorites.size
+        });
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+        logger.error('Error loading movies', { error: err, filters });
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMovies();
+  }, [filters, favoritesLoaded, favorites]);
 
   const toggleFavorite = async (movieId: string) => {
     const wasFavorite = favorites.has(movieId);
@@ -106,13 +122,34 @@ export const useMovies = (filters?: MovieFilters) => {
     }
   };
 
-  useEffect(() => {
-    loadFavorites();
-  }, []);
+  // Función para refetch manual
+  const refetch = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      logger.info('Refetching movies', { filters });
 
-  useEffect(() => {
-    loadMovies();
-  }, [loadMovies]);
+      // Recargar favoritos también
+      const favIds = await favoritesService.getFavorites();
+      const newFavorites = new Set(favIds);
+      setFavorites(newFavorites);
+
+      const response = await movieService.getMovies(filters);
+      
+      const moviesWithFavorites = response.movies.map(movie => ({
+        ...movie,
+        isFavorite: newFavorites.has(movie.id),
+      }));
+      
+      setMovies(moviesWithFavorites);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     logger.debug('Setting up favorite event listeners');
@@ -162,7 +199,8 @@ export const useMovies = (filters?: MovieFilters) => {
     movies,
     loading,
     error,
+    favorites,
     toggleFavorite,
-    refetch: loadMovies,
+    refetch,
   };
 };

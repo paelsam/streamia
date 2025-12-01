@@ -1,59 +1,12 @@
 import { createLogger } from '@streamia/shared/utils';
 import { TokenManager } from '@streamia/shared/utils';
 import { eventBus, EVENTS } from '@streamia/shared/events';
+import { API_URL } from '@streamia/shared/config';
 import type { FavoritePayload } from '../types/movie.types';
 
 const logger = createLogger('FavoritesService');
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-//Prueba
-const USE_MOCK_DATA = true;
-//const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || false;
 
 class FavoritesService {
-  private mockFavorites = new Set<string>();
-  private readonly MOCK_STORAGE_KEY = 'streamia_mock_favorites';
-
-  constructor() {
-    this.loadMockFavoritesFromStorage();
-  }
-
-  /**
-   * Cargar favoritos desde localStorage
-   */
-  private loadMockFavoritesFromStorage(): void {
-    if (typeof window === 'undefined') return;
-
-    try {
-      const stored = localStorage.getItem(this.MOCK_STORAGE_KEY);
-      if (stored) {
-        const favoritesArray = JSON.parse(stored) as string[];
-        this.mockFavorites = new Set(favoritesArray);
-        logger.info('Mock favorites loaded from storage', { 
-          count: favoritesArray.length 
-        });
-      }
-    } catch (error) {
-      logger.error('Error loading mock favorites from storage', error);
-    }
-  }
-
-  /**
-   * Guardar favoritos en localStorage
-   */
-  private saveMockFavoritesToStorage(): void {
-    if (typeof window === 'undefined') return;
-
-    try {
-      const favoritesArray = Array.from(this.mockFavorites);
-      localStorage.setItem(this.MOCK_STORAGE_KEY, JSON.stringify(favoritesArray));
-      logger.debug('Mock favorites saved to storage', { 
-        count: favoritesArray.length 
-      });
-    } catch (error) {
-      logger.error('Error saving mock favorites to storage', error);
-    }
-  }
-
   /**
    * Obtener headers con autenticación
    */
@@ -78,36 +31,50 @@ class FavoritesService {
    * Verificar si el usuario está autenticado
    */
   private isAuthenticated(): boolean {
-    if (USE_MOCK_DATA) {
-      return true; // En modo mock siempre está "autenticado"
-    }
     return TokenManager.isCurrentTokenValid();
   }
 
   /**
+   * Obtener el userId del localStorage o del token
+   */
+  private getUserId(): string | null {
+    // Primero intentar obtener del localStorage (store global)
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const userId = user.id || user._id || user.userId;
+        if (userId) {
+          logger.debug('Got userId from localStorage', { userId });
+          return userId;
+        }
+      }
+    } catch (error) {
+      logger.warn('Error getting userId from localStorage', { error });
+    }
+
+    // Fallback: intentar obtener del token JWT
+    const token = TokenManager.getToken();
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId || payload.id || payload.sub || null;
+      logger.debug('Got userId from token', { userId });
+      return userId;
+    } catch (error) {
+      logger.error('Error decoding token', { error });
+      return null;
+    }
+  }
+
+  /**
    * Añadir película a favoritos
+   * POST /api/favorites
    */
   async addFavorite(payload: FavoritePayload): Promise<void> {
     try {
       logger.info('Adding favorite', { movieId: payload.movieId });
-
-      // Modo Mock
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 300)); 
-        
-        this.mockFavorites.add(payload.movieId);
-        this.saveMockFavoritesToStorage();
-        
-        logger.info('Favorite added successfully (mock)', { 
-          movieId: payload.movieId,
-          totalFavorites: this.mockFavorites.size
-        });
-
-        eventBus.publish(EVENTS.FAVORITE_ADDED, { 
-          movieId: payload.movieId 
-        });
-        return;
-      }
 
       // Verificar autenticación antes de hacer request
       if (!this.isAuthenticated()) {
@@ -115,11 +82,10 @@ class FavoritesService {
         throw new Error('Debes iniciar sesión para añadir favoritos');
       }
 
-      // Modo Backend 
-      const response = await fetch(`${API_BASE_URL}/favorites`, {
+      const response = await fetch(`${API_URL}/favorites`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ movieId: payload.movieId }),
         credentials: 'include',
       });
 
@@ -162,28 +128,11 @@ class FavoritesService {
 
   /**
    * Eliminar película de favoritos
+   * DELETE /api/favorites/:movieId
    */
   async removeFavorite(movieId: string): Promise<void> {
     try {
       logger.info('Removing favorite', { movieId });
-
-      // Modo Mock
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 300)); 
-        
-        this.mockFavorites.delete(movieId);
-        this.saveMockFavoritesToStorage();
-        
-        logger.info('Favorite removed successfully (mock)', { 
-          movieId,
-          totalFavorites: this.mockFavorites.size
-        });
-
-        eventBus.publish(EVENTS.FAVORITE_REMOVED, { 
-          movieId 
-        });
-        return;
-      }
 
       // Verificar autenticación
       if (!this.isAuthenticated()) {
@@ -191,8 +140,7 @@ class FavoritesService {
         throw new Error('Debes iniciar sesión para gestionar favoritos');
       }
 
-      // Modo Backend 
-      const response = await fetch(`${API_BASE_URL}/favorites/${movieId}`, {
+      const response = await fetch(`${API_URL}/favorites/${movieId}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders(),
         credentials: 'include',
@@ -229,21 +177,11 @@ class FavoritesService {
 
   /**
    * Obtener todos los favoritos del usuario
+   * GET /api/favorites (userId viene del token)
    */
   async getFavorites(): Promise<string[]> {
     try {
       logger.info('Fetching user favorites');
-
-      // Modo Mock
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 200)); 
-        
-        const favoritesArray = Array.from(this.mockFavorites);
-        logger.info('Favorites fetched successfully (mock)', { 
-          count: favoritesArray.length 
-        });
-        return favoritesArray;
-      }
 
       // Si no hay token válido, devolver array vacío
       if (!this.isAuthenticated()) {
@@ -251,10 +189,16 @@ class FavoritesService {
         return [];
       }
 
-      // Modo Backend 
-      const response = await fetch(`${API_BASE_URL}/favorites`, {
+      const response = await fetch(`${API_URL}/favorites`, {
         headers: this.getAuthHeaders(),
         credentials: 'include',
+      });
+
+      // Log para debugging
+      console.log('🎬 GET Favorites Request:', {
+        url: `${API_URL}/favorites`,
+        status: response.status,
+        ok: response.ok
       });
 
       // Si no está autenticado, devolver array vacío
@@ -277,25 +221,52 @@ class FavoritesService {
 
       const data = await response.json();
       
+      // Log para debugging - ver estructura de respuesta
+      console.log('🎬 GET Favorites Response:', {
+        rawData: data,
+        dataType: typeof data,
+        isArray: Array.isArray(data),
+        keys: data ? Object.keys(data) : []
+      });
+      
+      logger.debug('Favorites API response', { data });
+      
       // Manejar diferentes formatos de respuesta
       let favoriteIds: string[] = [];
       
+      // Extraer el array de favoritos de la respuesta
+      let favoritesArray: any[] = [];
+      
       if (Array.isArray(data)) {
-        favoriteIds = data.map(item => 
-          typeof item === 'string' ? item : item.movieId || item.id
-        );
+        favoritesArray = data;
       } else if (data.favorites && Array.isArray(data.favorites)) {
-        favoriteIds = data.favorites.map((item: any) => 
-          typeof item === 'string' ? item : item.movieId || item.id
-        );
+        favoritesArray = data.favorites;
       } else if (data.data && Array.isArray(data.data)) {
-        favoriteIds = data.data.map((item: any) => 
-          typeof item === 'string' ? item : item.movieId || item.id
-        );
+        favoritesArray = data.data;
+      } else if (data.movies && Array.isArray(data.movies)) {
+        favoritesArray = data.movies;
       }
 
+      // Extraer IDs de cada item
+      favoriteIds = favoritesArray.map(item => {
+        if (typeof item === 'string') {
+          return item;
+        }
+        // Si es un objeto de favorito con movieId como objeto (populated)
+        if (item.movieId && typeof item.movieId === 'object') {
+          return item.movieId._id || item.movieId.id;
+        }
+        // Si movieId es un string
+        if (item.movieId && typeof item.movieId === 'string') {
+          return item.movieId;
+        }
+        // Si es un objeto de película directamente
+        return item._id || item.id;
+      });
+
       logger.info('Favorites fetched successfully', { 
-        count: favoriteIds.length 
+        count: favoriteIds.length,
+        ids: favoriteIds
       });
       
       return favoriteIds.filter(id => id != null);
@@ -310,10 +281,6 @@ class FavoritesService {
    */
   async isFavorite(movieId: string): Promise<boolean> {
     try {
-      if (USE_MOCK_DATA) {
-        return this.mockFavorites.has(movieId);
-      }
-
       const favorites = await this.getFavorites();
       return favorites.includes(movieId);
     } catch (error) {
@@ -342,22 +309,6 @@ class FavoritesService {
       logger.error('Error toggling favorite', { error, movieId });
       throw error;
     }
-  }
-
-  /**
-   * Limpiar todos los favoritos mock (útil para testing)
-   */
-  clearMockFavorites(): void {
-    this.mockFavorites.clear();
-    localStorage.removeItem(this.MOCK_STORAGE_KEY);
-    logger.info('Mock favorites cleared');
-  }
-
-  /**
-   * Obtener cantidad de favoritos mock
-   */
-  getMockFavoritesCount(): number {
-    return this.mockFavorites.size;
   }
 
   /**

@@ -6,6 +6,7 @@ import { favoritesService } from '../services/favoritesService';
 import { eventBus, EVENTS } from '@streamia/shared/events';
 import { createLogger, TokenManager } from '@streamia/shared/utils';
 import { MovieCard } from '../components/MovieCard';
+import { MovieDetailModal } from '../components/MovieDetailModal';
 import type { Movie } from '../types/movie.types';
 import '../styles/HomeMoviesPage.scss';
 
@@ -20,6 +21,8 @@ export const HomeMoviesPage: React.FC = () => {
   const [newReleases, setNewReleases] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [favoritesIds, setFavoritesIds] = useState<Set<string>>(new Set());
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fallback featured movies
   const fallbackFeaturedMovies: Movie[] = [
@@ -186,15 +189,28 @@ export const HomeMoviesPage: React.FC = () => {
   };
 
   const loadFavorites = async () => {
-    try {
-      logger.info('Loading favorites', { 
-        authenticated: TokenManager.isCurrentTokenValid() 
-      });
+    const isAuthenticated = TokenManager.isCurrentTokenValid();
+    
+    logger.info('Loading favorites', { 
+      authenticated: isAuthenticated 
+    });
 
+    // Solo cargar favoritos si el usuario está autenticado
+    if (!isAuthenticated) {
+      logger.debug('User not authenticated, clearing favorites');
+      setFavoritesIds(new Set());
+      return;
+    }
+
+    try {
       const favIds = await favoritesService.getFavorites();
-      setFavoritesIds(new Set(favIds));
       
-      logger.info('Favorites loaded successfully', { count: favIds.length });
+      logger.info('Favorites loaded successfully', { 
+        count: favIds.length,
+        ids: favIds 
+      });
+      
+      setFavoritesIds(new Set(favIds));
     } catch (error) {
       logger.error('Error loading favorites', error);
       setFavoritesIds(new Set());
@@ -247,12 +263,18 @@ export const HomeMoviesPage: React.FC = () => {
     }
   };
 
-  const handleMovieClick = (movieId: string) => {
-    logger.info('Movie selected', { movieId });
+  const handleMovieClick = (movie: Movie) => {
+    logger.info('Movie selected, opening modal', { movieId: movie.id });
     
-    eventBus.publish(EVENTS.MOVIE_SELECTED, { movieId });
+    eventBus.publish(EVENTS.MOVIE_SELECTED, { movieId: movie.id });
     
-    navigate(`/movie/${movieId}`);
+    setSelectedMovie(movie);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMovie(null);
   };
 
   const handlePlayMovie = (movie: Movie) => {
@@ -317,7 +339,7 @@ export const HomeMoviesPage: React.FC = () => {
                   </button>
                   <button 
                     className="btn btn--secondary btn--large"
-                    onClick={() => handleMovieClick(movie.id)}
+                    onClick={() => handleMovieClick(movie)}
                     aria-label={`Más información sobre ${movie.title}`}
                   >
                     <Info size={24} />
@@ -376,7 +398,7 @@ export const HomeMoviesPage: React.FC = () => {
               movie={movie}
               isFavorite={favoritesIds.has(movie.id)}
               onFavoriteToggle={handleToggleFavorite}
-              onClick={() => handleMovieClick(movie.id)}
+              onClick={() => handleMovieClick(movie)}
             />
           ))}
         </div>
@@ -391,11 +413,20 @@ export const HomeMoviesPage: React.FC = () => {
               movie={movie}
               isFavorite={favoritesIds.has(movie.id)}
               onFavoriteToggle={handleToggleFavorite}
-              onClick={() => handleMovieClick(movie.id)}
+              onClick={() => handleMovieClick(movie)}
             />
           ))}
         </div>
       </section>
+
+      {/* Modal de detalle de película */}
+      <MovieDetailModal
+        movie={selectedMovie}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        isFavorite={selectedMovie ? favoritesIds.has(selectedMovie.id) : false}
+        onFavoriteToggle={handleToggleFavorite}
+      />
     </div>
   );
 };

@@ -6,8 +6,10 @@ import { createLogger } from '@streamia/shared/utils';
 import { MovieGrid } from '../components/MovieGrid';
 import { FilterPanel } from '../components/FilterPanel';
 import { CategorySelector } from '../components/CategorySelector';
+import { MovieDetailModal } from '../components/MovieDetailModal';
 import { useMovies } from '../hooks/useMovies';
 import { useFilters } from '../hooks/useFilters';
+import type { Movie } from '../types/movie.types';
 import '../styles/MoviesListPage.scss';
 
 const logger = createLogger('MoviesListPage');
@@ -17,6 +19,8 @@ export const MoviesListPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const initialCategory = searchParams.get('category') || undefined;
   const initialSearch = searchParams.get('search') || undefined;
@@ -112,15 +116,21 @@ export const MoviesListPage: React.FC = () => {
     setSearchQuery(query);
   };
 
-  const handleMovieClick = (movie: any) => {
-    logger.info('Movie clicked', { movieId: movie.id, title: movie.title });
+  const handleMovieClick = (movie: Movie) => {
+    logger.info('Movie clicked, opening modal', { movieId: movie.id, title: movie.title });
     
     eventBus.publish(EVENTS.MOVIE_SELECTED, {
       movieId: movie.id,
       movie
     });
     
-    navigate(`/movie/${movie.id}`);
+    setSelectedMovie(movie);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMovie(null);
   };
 
   const handleClearSearch = () => {
@@ -272,6 +282,15 @@ export const MoviesListPage: React.FC = () => {
           onClick={() => setShowFilters(false)}
         />
       )}
+
+      {/* Modal de detalle de película */}
+      <MovieDetailModal
+        movie={selectedMovie}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        isFavorite={selectedMovie ? movies.find(m => m.id === selectedMovie.id)?.isFavorite || false : false}
+        onFavoriteToggle={toggleFavorite}
+      />
     </div>
   );
 };

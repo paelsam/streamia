@@ -6,14 +6,16 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "./start-dev.sh",
+    "dev": "bash start-dev.sh",
     "dev:shell": "npm run dev --workspace=shell",
     "dev:auth": "npm run dev --workspace=@streamia/auth-mfe",
     "dev:static": "npm run dev --workspace=@streamia/static-mfe",
+    "dev:player": "npm run dev --workspace=@streamia/player-mfe",
     "build": "npm run build --workspaces",
     "build:shell": "npm run build --workspace=shell",
     "build:auth": "npm run build --workspace=@streamia/auth-mfe",
     "build:static": "npm run build --workspace=@streamia/static-mfe",
+    "build:player": "npm run build --workspace=@streamia/player-mfe",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "clean": "rm -rf packages/*/dist packages/*/node_modules"
@@ -21,5 +23,8 @@
   "devDependencies": {
     "@types/node": "^24.10.1",
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "react-hot-toast": "^2.6.0"
   }
 }

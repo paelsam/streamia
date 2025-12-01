@@ -41,11 +41,22 @@ const StaticMFE = loadMicrofrontend(
   'Static MFE'
 );
 
+const FavoritesMFE = loadMicrofrontend(
+  () => import('favoritesMFE/App'),
+  'Favorites MFE'
+);
+
 
 // Load Comments MFE
 const CommentsMFE = loadMicrofrontend(
   () => import('commentsMFE/App'),
   'Comments MFE'
+);
+
+// Load Profile MFE
+const ProfileMFE = loadMicrofrontend(
+  () => import('profileMFE/App'),
+  'Profile MFE'
 );
 
 
@@ -62,18 +73,8 @@ export const AppRouter: React.FC = () => {
               <Route path="/recover-password" element={<GuestRoute><AuthMFE /></GuestRoute>} />
               <Route path="/reset-password/*" element={<GuestRoute><AuthMFE /></GuestRoute>} />
 
-              <Route path="/home-movies" element={<CatalogMFE />} />
-              <Route path="/movies" element={<CatalogMFE />} />
-
-              {/* Protected Routes - Placeholder for other MFEs */}
-              <Route
-                path="/movies"
-                element={
-                  <ProtectedRoute>
-                    <div>Movies MFE (To be implemented)</div>
-                  </ProtectedRoute>
-                }
-              />
+              {/* Catalog MFE Routes */}
+              <Route path="/movies/*" element={<CatalogMFE />} />
               <Route
                 path="/movie/:id"
                 element={
@@ -82,22 +83,19 @@ export const AppRouter: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/profile"
+
+              {/*Profile Routes - Profile MFE */}
+              <Route path="/profile/*" element={<ProfileMFE />} />
+              
+              <Route 
+                path="/favorites/*" 
                 element={
                   <ProtectedRoute>
-                    <div>Profile MFE (To be implemented)</div>
+                    <FavoritesMFE />
                   </ProtectedRoute>
-                }
+                } 
               />
-              <Route
-                path="/favorites"
-                element={
-                  <ProtectedRoute>
-                    <div>Favorites MFE (To be implemented)</div>
-                  </ProtectedRoute>
-                }
-              />
+          
 
               <Route
                 path="/movies/:id/comments"

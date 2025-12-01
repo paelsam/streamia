@@ -59,7 +59,7 @@ export const NavBar: React.FC = () => {
           <span>STREAMIA</span>
         </Link>
 
-        <button 
+        <button
           className="navbar-toggle"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -68,13 +68,14 @@ export const NavBar: React.FC = () => {
 
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           <div className="navbar-links">
-            <Link to="/" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
             {isAuthenticated ? (
               <>
                 <Link to="/movies" onClick={() => setIsMenuOpen(false)}>Películas</Link>
                 <Link to="/favorites" onClick={() => setIsMenuOpen(false)}>Favoritos</Link>
               </>
-            ) : null}
+            ) : (
+              <Link to="/" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
+            )}
             <Link to="/about" onClick={() => setIsMenuOpen(false)}>Acerca de</Link>
             <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contacto</Link>
           </div>
@@ -82,7 +83,7 @@ export const NavBar: React.FC = () => {
           <div className="navbar-actions">
             {isAuthenticated && user ? (
               <div className="navbar-user-dropdown" ref={dropdownRef}>
-                <button 
+                <button
                   className="navbar-user-button"
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                 >
@@ -90,11 +91,11 @@ export const NavBar: React.FC = () => {
                   <span>{user.firstName}</span>
                   <ChevronDown size={16} className={`dropdown-arrow ${isUserDropdownOpen ? 'open' : ''}`} />
                 </button>
-                
+
                 {isUserDropdownOpen && (
                   <div className="dropdown-menu">
-                    <Link 
-                      to="#" 
+                    <Link
+                      to="/profile"
                       className="dropdown-item"
                       onClick={() => {
                         setIsUserDropdownOpen(false);
@@ -104,6 +105,7 @@ export const NavBar: React.FC = () => {
                       <User size={18} />
                       <span>Ver perfil</span>
                     </Link>
+
                     <button onClick={handleLogout} className="dropdown-item logout">
                       <LogOut size={18} />
                       <span>Cerrar sesión</span>
@@ -113,14 +115,14 @@ export const NavBar: React.FC = () => {
               </div>
             ) : (
               <>
-                <button 
-                  className="navbar-button" 
+                <button
+                  className="navbar-button"
                   onClick={() => handleAuthNavigation('/login')}
                 >
                   Iniciar Sesión
                 </button>
-                <button 
-                  className="navbar-button primary" 
+                <button
+                  className="navbar-button primary"
                   onClick={() => handleAuthNavigation('/register')}
                 >
                   Registrarse

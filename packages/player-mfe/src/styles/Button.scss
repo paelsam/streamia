@@ -1,0 +1,95 @@
+@use '@streamia/shared/styles/variables' as *;  
+@use '@streamia/shared/styles/mixins' as *;
+
+
+.btn {
+  @include button-base;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-normal;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  // Variants
+  &--primary {
+    @include button-primary;
+  }
+
+  &--outline {
+    @include button-outline;
+  }
+
+  &--secondary {
+    background: $secondary-color;
+    color: $text-primary;
+    border: 2px solid $secondary-color;
+
+    &:hover:not(:disabled) {
+      background: lighten($secondary-color, 10%);
+      border-color: lighten($secondary-color, 10%);
+    }
+  }
+
+  &.is-favorite, &.is-favorite.btn--secondary {
+    background: $primary-color;
+    color: #ffffff;
+    border-color: $primary-color;
+
+    svg, path {
+      stroke: none;
+      fill: #ffffff;
+    }
+
+    &:hover:not(:disabled) {
+      background: darken($primary-color, 6%);
+      border-color: darken($primary-color, 6%);
+    }
+  }
+
+  // Sizes
+  &--small {
+    padding: 0.5rem 1rem;
+    font-size: $font-size-sm;
+    min-width: 120px;
+  }
+
+  &--medium {
+    padding: 0.8rem 1.5rem;
+    font-size: $font-size-base;
+    min-width: 160px;
+  }
+
+  &--large {
+    padding: 1rem 2rem;
+    font-size: $font-size-lg;
+    min-width: 200px;
+  }
+
+  @include mobile {
+    &--small {
+      padding: 0.4rem 0.8rem;
+      font-size: $font-size-xs;
+      min-width: 100px;
+    }
+
+    &--medium {
+      padding: 0.75rem 1.25rem;
+      font-size: $font-size-sm;
+      min-width: 140px;
+    }
+
+    &--large {
+      padding: 0.875rem 1.5rem;
+      font-size: $font-size-base;
+      min-width: 180px;
+    }
+  }
+}

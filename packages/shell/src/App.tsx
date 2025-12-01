@@ -1,4 +1,3 @@
-import React from 'react';
 import { SharedStoreProvider } from './store/SharedStore';
 import { AppRouter } from './router/AppRouter';
 import './styles/global.scss';
