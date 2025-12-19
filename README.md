@@ -668,4 +668,3 @@ Este proyecto es parte de un trabajo académico para la materia Desarrollo de So
 
 ---
 
-**Construido con ❤️ usando Microfrontends y Module Federation**

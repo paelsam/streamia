@@ -1,0 +1,13 @@
+# Environment variables
+.env.local
+.env
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Cache
+.vite
+.vercel

@@ -151,24 +151,89 @@
     &:hover {
       background: rgba(255, 255, 255, 0.1);
     }
+
+    &-dropdown {
+      position: relative;
+    }
+
+    &-button {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      background: none;
+      border: none;
+      color: $text-primary;
+      cursor: pointer;
+      padding: $spacing-sm $spacing-md;
+      border-radius: $border-radius-md;
+      transition: all $transition-normal;
+      font-weight: $font-weight-medium;
+      font-size: $font-size-base;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .dropdown-arrow {
+        transition: transform $transition-normal;
+
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
   }
 
-  &-logout {
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: $spacing-xs;
+    background: $background-gray;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: $border-radius-md;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    min-width: 180px;
+    overflow: hidden;
+    z-index: 1001;
+
+    @include mobile {
+      position: static;
+      margin-top: $spacing-sm;
+      width: 100%;
+      box-shadow: none;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .dropdown-item {
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    width: 100%;
+    padding: $spacing-md $spacing-lg;
     background: none;
     border: none;
     color: $text-secondary;
+    text-decoration: none;
     cursor: pointer;
-    padding: $spacing-sm $spacing-md;
-    border-radius: $border-radius-md;
     transition: all $transition-normal;
+    font-size: $font-size-sm;
     font-weight: $font-weight-medium;
 
     &:hover {
-      background: rgba($primary-color, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: $text-primary;
+    }
+
+    &.logout {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       color: $primary-color;
+
+      &:hover {
+        background: rgba($primary-color, 0.15);
+      }
     }
   }
 

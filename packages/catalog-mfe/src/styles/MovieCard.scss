@@ -1,0 +1,195 @@
+// Netflix-style Movie Card
+.movie-card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #181818;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  aspect-ratio: 2 / 3;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+    z-index: 20;
+  }
+
+  // Poster image
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  // Gradient overlay
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.4) 40%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover &__overlay {
+    opacity: 1;
+  }
+
+  // Favorite button
+  &__favorite {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 15;
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(4px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0;
+
+    &:hover {
+      background: rgba(20, 20, 20, 0.9);
+      border-color: white;
+      transform: scale(1.15);
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &--active {
+      opacity: 1;
+      
+      svg {
+        fill: #e50914;
+        stroke: #e50914;
+      }
+
+      &:hover svg {
+        fill: #ff1f2e;
+      }
+    }
+
+    &--inactive {
+      svg {
+        fill: none;
+        stroke: white;
+        stroke-width: 2;
+      }
+
+      &:hover svg {
+        fill: rgba(229, 9, 20, 0.4);
+        stroke: #e50914;
+      }
+    }
+  }
+
+  &:hover &__favorite {
+    opacity: 1;
+  }
+
+  // Content info on hover
+  &__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px;
+    transform: translateY(10px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  &:hover &__content {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  &__title {
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__description {
+    color: #b3b3b3;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+  }
+
+  &__rating {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #46d369;
+    font-weight: 600;
+
+    &-star {
+      font-size: 0.8rem;
+    }
+
+    &-value {
+      color: #46d369;
+    }
+  }
+
+  &__duration {
+    color: #808080;
+  }
+
+  &__genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  &__genre {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #e5e5e5;
+  }
+}
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.movie-card__favorite--active svg {
+  animation: heartPop 0.3s ease;
+}

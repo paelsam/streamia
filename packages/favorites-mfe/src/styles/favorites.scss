@@ -1,0 +1,93 @@
+@use '@streamia/shared/styles/variables' as *;
+@use '@streamia/shared/styles/mixins' as *;
+
+.favorites {
+  padding: $spacing-xl $spacing-lg;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @include mobile {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  &__header {
+    margin-bottom: $spacing-xl;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+
+    @include mobile {
+      font-size: $font-size-2xl;
+    }
+  }
+
+  &__count {
+    font-size: $font-size-lg;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &__content {
+    width: 100%;
+  }
+
+  &__error {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: $border-radius-md;
+    padding: $spacing-lg;
+    color: #fca5a5;
+    text-align: center;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: $spacing-lg;
+    
+    @include tablet {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: $spacing-md;
+    }
+
+    @include mobile {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: $spacing-sm;
+    }
+  }
+
+  &__card {
+    width: 100%;
+  }
+
+  &__empty {
+    text-align: center;
+    padding: $spacing-xxl $spacing-lg;
+    color: $text-secondary;
+
+    @include mobile {
+      padding: $spacing-xxl $spacing-md;
+    }
+  }
+
+  &__empty-icon {
+    font-size: 4rem;
+    margin-bottom: $spacing-lg;
+    opacity: 0.5;
+  }
+
+  h3 {
+    font-size: $font-size-xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    font-size: $font-size-base;
+    color: $text-secondary;
+  }
+}
