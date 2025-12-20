@@ -103,12 +103,12 @@ graph TB
     US --> EMAIL
     
     style S fill:#ff6b6b
-    style MF1 fill:#61dafb
-    style MF2 fill:#61dafb
-    style MF3 fill:#61dafb
-    style MF4 fill:#61dafb
-    style MF5 fill:#61dafb
-    style MF6 fill:#61dafb
+    style MF1 fill:#365ec9
+    style MF2 fill:#365ec9
+    style MF3 fill:#365ec9
+    style MF4 fill:#365ec9
+    style MF5 fill:#365ec9
+    style MF6 fill:#365ec9
     style API fill:#68a063
 ```
 
